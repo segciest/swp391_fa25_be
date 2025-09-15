@@ -15,9 +15,9 @@ import java.util.Date;
 @AllArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "Id", nullable = false)
-    private Long userID;
+    private String userID;
     @Column(name = "Name", nullable = false)
     private String user_Name;
 
