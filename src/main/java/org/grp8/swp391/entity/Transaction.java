@@ -25,7 +25,7 @@ public class Transaction {
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "listing_id", nullable = false)
     private Listing listing;
 
