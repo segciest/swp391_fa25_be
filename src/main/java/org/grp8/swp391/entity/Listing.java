@@ -12,19 +12,27 @@ import java.util.Date;
 @AllArgsConstructor
 public class Listing {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long listing_id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String listing_id;
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
-    private String categories;
+    @ManyToOne
+    @JoinColumn(name = "Category", nullable = false)
+    private Category category;
+
     private String title;
     private String description;
     private String price;
-    private String status;
-    @Temporal(TemporalType.TIMESTAMP)
 
+    @Enumerated(EnumType.STRING)
+    private ListingStatus status;
+
+    @Temporal(TemporalType.TIMESTAMP)
     private Date created_at;
 
 
 }
+
+
+
