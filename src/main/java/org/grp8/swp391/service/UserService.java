@@ -65,7 +65,7 @@ public class UserService {
             throw new RuntimeException("User already exists");
         }
 
-        if(user.getUser_Password()==null){
+        if(user.getUser_Status()==null){
             user.setUser_Status("Active");
         }
 
