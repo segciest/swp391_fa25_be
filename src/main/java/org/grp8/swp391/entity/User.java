@@ -1,6 +1,7 @@
 package org.grp8.swp391.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class User {
     private String user_Name;
 
     @Column(name = "Email", nullable = false)
+    @Email
     private String user_Email;
     @Column(name = "Password", nullable = false)
     private String user_Password;

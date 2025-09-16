@@ -45,4 +45,9 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PutMapping("/{id}")
+    public void deleteUser(@PathVariable String id){
+        User u = userService.findUserById(id);
+        userService.deleteById(id);
+    }
 }
