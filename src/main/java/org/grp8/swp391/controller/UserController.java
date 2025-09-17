@@ -1,6 +1,7 @@
 package org.grp8.swp391.controller;
 
 
+import org.grp8.swp391.dto.LoginRequest;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,4 +51,16 @@ public class UserController {
         User u = userService.findUserById(id);
         userService.deleteById(id);
     }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            User user = userService.login(request.getEmail(), request.getPassword());
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
