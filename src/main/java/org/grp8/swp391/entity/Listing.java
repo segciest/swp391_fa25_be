@@ -13,7 +13,7 @@ import java.util.Date;
 public class Listing {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String listing_id;
+    private String listingId;
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;

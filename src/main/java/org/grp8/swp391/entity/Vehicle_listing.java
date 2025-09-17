@@ -10,18 +10,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle_listing {
-    @OneToOne(cascade = CascadeType.ALL)
+
     @Id
-    private Listing battery_id;
-    @Column(name = "Brand",nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "Vehicle_id",nullable = false)
+    private Listing vehicle_listing;
+    @Column(name = "Brand", nullable = false)
+
     private String brand;
-    @Column(name = "Capacity",nullable = false)
+    @Column(name = "Model", nullable = false)
 
-    private String capacity;
-    @Column(name = "Cycle",nullable = false)
+    private String model;
+    @Column(name = "Color", nullable = false)
 
-    private String cycle_count;
-    @Column(name = "Warranty_info",nullable = false)
+    private String color;
+    @Column(name = "Size", nullable = false)
 
-    private String warranty_info;
+    private String size;
+    @Column(name = "Mileage", nullable = false)
+
+    private String mileage;
+    @Column(name = "Battery_capacity", nullable = false)
+
+    private int battery_capacity;
 }

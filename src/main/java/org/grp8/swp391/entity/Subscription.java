@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String Sub_id;
+    private Long Sub_id;
     private String Sub_name;
     private String Sub_details;
     private String Sub_price;

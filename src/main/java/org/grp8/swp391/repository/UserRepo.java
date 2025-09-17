@@ -13,12 +13,9 @@ import java.util.Optional;
 @Repository
 public interface UserRepo extends JpaRepository<User, String> {
     User findByUserID(String userID);
-    User findByUser_Name(String userName);
-    User findByUser_Email(String userEmail);
-    User findByUser_EmailAndUser_Password(String email, String password);
-    User deleteByUserID(String userID);
-
-    User save(User user);
-    List<User> getAllUsers();
+    User findByUserName(String userName);
+    User findByUserEmail(String userEmail);
+    User findByUserEmailAndUserPassword(String userEmail, String userPassword);
+    void deleteByUserID(String userID);
 
 }
