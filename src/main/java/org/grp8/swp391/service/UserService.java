@@ -13,8 +13,12 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
-    public User login(String username, String password){
-        return userRepo.findByUser_EmailAndUser_Password(username,password);
+    public User login(String email, String password) {
+        User user = userRepo.findByUser_EmailAndUser_Password(email, password);
+        if (user == null) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        return user;
     }
 
     public User findByUser_Email(String email){
