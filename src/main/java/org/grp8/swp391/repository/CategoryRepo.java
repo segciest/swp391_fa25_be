@@ -11,6 +11,6 @@ public interface CategoryRepo extends JpaRepository<Category,Long> {
     Category deleteByCategoryId(Long categoryId);
     Category create(Category category);
     Category updateByCategoryId(Category category, String id);
-    Category findByCategoryId(Long categoryId);git add .
+    Category findByCategoryId(Long categoryId);
 
 }
