@@ -14,7 +14,7 @@ public class UserService {
     private UserRepo userRepo;
 
     public User login(String email, String password) {
-        User user = userRepo.findByUser_EmailAndUser_Password(email, password);
+        User user = userRepo.findByUserEmailAndUserPassword(email, password);
         if (user == null) {
             throw new RuntimeException("Invalid email or password");
         }
@@ -24,7 +24,7 @@ public class UserService {
     public User findByUser_Email(String email){
 
 
-        return userRepo.findByUser_Email(email);
+        return userRepo.findByUserEmail(email);
     }
 
     public void deleteById(String id){
@@ -42,20 +42,20 @@ public class UserService {
             throw new RuntimeException("User not found with id: " + id);
         }
 
-        if (up.getUser_Name() != null) {
-            check.setUser_Name(up.getUser_Name());
+        if (up.getUserName() != null) {
+            check.setUserName(up.getUserName());
         }
-        if (up.getUser_Email() != null) {
-            check.setUser_Email(up.getUser_Email());
+        if (up.getUserEmail() != null) {
+            check.setUserEmail(up.getUserEmail());
         }
-        if (up.getUser_Password() != null) {
-            check.setUser_Password(up.getUser_Password());
+        if (up.getUserPassword() != null) {
+            check.setUserPassword(up.getUserPassword());
         }
         if (up.getDob() != null) {
             check.setDob(up.getDob());
         }
-        if (up.getUser_Status() != null) {
-            check.setUser_Status(up.getUser_Status());
+        if (up.getUserStatus() != null) {
+            check.setUserStatus(up.getUserStatus());
         }
         if (up.getRole() != null) {
             check.setRole(up.getRole());
@@ -65,12 +65,12 @@ public class UserService {
     }
 
     public User registerUser(User user){
-        if(userRepo.findByUser_Email(user.getUser_Email())!=null){
+        if(userRepo.findByUserEmail(user.getUserEmail())!=null){
             throw new RuntimeException("User already exists");
         }
 
-        if(user.getUser_Status()==null){
-            user.setUser_Status("Active");
+        if(user.getUserStatus()==null){
+            user.setUserStatus("Active");
         }
 
         return userRepo.save(user);

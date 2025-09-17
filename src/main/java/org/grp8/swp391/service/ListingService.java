@@ -3,6 +3,7 @@ package org.grp8.swp391.service;
 
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.ListingStatus;
+import org.grp8.swp391.entity.User;
 import org.grp8.swp391.repository.ListingRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,15 +23,15 @@ public class ListingService {
     }
 
     public Page<Listing> findByCategoryId(Long categoryId, Pageable pageable) {
-        return listingRepo.findByCategory(categoryId, pageable);
+        return listingRepo.findByCategory_CategoryId(categoryId, pageable);
     }
 
     public Page<Listing> findByStatus(ListingStatus status, Pageable pageable) {
         return listingRepo.findByStatus(status, pageable);
     }
 
-    public Page<Listing> findBySellerId(Long sellerId, Pageable pageable) {
-        return listingRepo.findBySeller(sellerId, pageable);
+    public Page<Listing> findBySellerId(String sellerId, Pageable pageable) {
+        return listingRepo.findBySeller_UserID(sellerId, pageable);
     }
 
     public Listing save(Listing listing) {
