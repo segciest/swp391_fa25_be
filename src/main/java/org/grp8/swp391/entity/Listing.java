@@ -24,12 +24,14 @@ public class Listing {
     private String title;
     private String description;
     private String price;
-
+    private String contractInfo;
     @Enumerated(EnumType.STRING)
     private ListingStatus status;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date created_at;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated_at;
 
 
 }
