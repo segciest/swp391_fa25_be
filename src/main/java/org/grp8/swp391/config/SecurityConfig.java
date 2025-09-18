@@ -21,12 +21,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register", "/api/users/login").permitAll() // cho phép không cần token
-                        .anyRequest().authenticated() // các request khác cần JWT
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        .requestMatchers("/api/users/register", "/api/users/login", "/api/users/list").permitAll()
+                        .anyRequest().permitAll() // tạm thời cho phép hết
+                );
 
         return http.build();
     }

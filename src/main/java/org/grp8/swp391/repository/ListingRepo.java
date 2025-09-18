@@ -1,9 +1,7 @@
 package org.grp8.swp391.repository;
 
-import org.grp8.swp391.entity.Contract;
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.ListingStatus;
-import org.grp8.swp391.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
