@@ -2,6 +2,7 @@ package org.grp8.swp391.controller;
 
 
 import org.grp8.swp391.dto.LoginRequest;
+import org.grp8.swp391.dto.LoginResponse;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public List<User> getAllUser(@RequestBody User user) {
+    public List<User> getAllUser(User user) {
         return userService.getAllUsers();
     }
 
@@ -56,8 +57,16 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            User user = userService.login(request.getEmail(), request.getPassword());
-            return ResponseEntity.ok(user);
+            User user = userService.login(request.getUserEmail(), request.getUserPassword());
+
+            LoginResponse res = new LoginResponse();
+            res.setUserName(user.getUserName());
+            res.setUserEmail(user.getUserEmail());
+            res.setUserStatus(user.getUserStatus());
+            res.setDob(user.getDob());
+            res.setRole(user.getRole());
+
+            return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

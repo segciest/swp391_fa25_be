@@ -20,7 +20,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "Id", nullable = false)
     private String userID;
-    @Column(name = "Name", nullable = false)
+    @Column(name = "Name", nullable = false,columnDefinition = "NVARCHAR(100)")
     private String userName;
 
     @Column(name = "Email", nullable = false)
@@ -28,10 +28,10 @@ public class User {
     private String userEmail;
     @Column(name = "Password", nullable = false)
     private String userPassword;
-    @Column(name = "DateofBirth", nullable = false)
+    @Column(name = "DoB", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dob;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
