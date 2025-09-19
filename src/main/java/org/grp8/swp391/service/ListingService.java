@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
 import java.util.Date;
+import java.util.List;
 
 
 @Service
@@ -22,6 +23,10 @@ public class ListingService {
 
     public Page<Listing> findAll(Pageable pageable) {
         return listingRepo.findAll(pageable);
+    }
+
+    public void delete(String id) {
+        listingRepo.deleteById(id);
     }
 
     public Page<Listing> findByCategoryId(Long categoryId, Pageable pageable) {
@@ -124,4 +129,18 @@ public class ListingService {
     public Page<Listing> findByBrand(String brand, Pageable pageable) {
         return listingRepo.findByBrandIgnoreCase(brand, pageable);
     }
+
+    public Page<Listing> filterByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
+        return  listingRepo.findByPriceBetween(minPrice, maxPrice, pageable);
+    }
+
+    public Page<Listing>  findByVehicleType(String vehicleType, Pageable pageable) {
+        return listingRepo.findByVehicleTypeIgnoreCase(vehicleType, pageable);
+    }
+
+    public Page<Listing> findByYearRange(Integer start, Integer end, Pageable pageable) {
+        return listingRepo.findByYearBetween(start, end, pageable);
+    }
+
+
 }
