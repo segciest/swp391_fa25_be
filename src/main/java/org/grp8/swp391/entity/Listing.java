@@ -18,24 +18,63 @@ public class Listing {
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
     @ManyToOne
-    @JoinColumn(name = "Category", nullable = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
     @Column(name = "Title", nullable = false)
     private String title;
     @Column(name = "Description", nullable = false)
     private String description;
-    @Column(name = "Price",nullable = false)
-    private String price;
-    @Column(name = "Contract_info",nullable = false)
+    @Column(name = "Brand", nullable = true)
+    private String brand;
+    @Column(name = "Warranty", nullable = true)
 
-    private String contractInfo;
+    private String warrantyInfo;
+    @Column(name = "Model", nullable = true)
+
+    private String model;
+    @Column(name = "Year", nullable = true)
+
+    private Integer year;
+    @Column(name = "Seat", nullable = true)
+
+    private Integer seats;
+    @Column(name = "Vehicle_type", nullable = true)
+
+    private String vehicleType;
+    @Column(name = "Color", nullable = true)
+
+    private String color;
+    @Column(name = "Mileage", nullable = true)
+
+    private String mileage;
+    @Column(name = "Battery_capacity", nullable = true)
+
+    private String batteryCapacity;
+    @Column(name = "Capacity", nullable = true)
+
+    private String capacity;
+    @Column(name = "Voltage", nullable = true)
+
+    private String voltage;
+    @Column(name = "Cycle_count", nullable = true)
+
+    private Integer cycleCount;
+    @Column(name = "Battery_life", nullable = true)
+
+    private String batteryLifeRemaining;
+
+    @Column(name = "Price",nullable = false)
+    private Double price;
+    @Column(name = "Contract",nullable = false)
+
+    private String contract;
     @Enumerated(EnumType.STRING)
     private ListingStatus status;
     @Column(name = "Create_At",nullable = false)
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
-    @Column(name = "Update_At",nullable = false)
+    @Column(name = "Update_At",nullable = true)
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;

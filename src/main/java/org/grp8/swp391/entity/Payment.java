@@ -18,16 +18,21 @@ public class Payment {
     private Long paymentId;
     @ManyToOne
     @JoinColumn(name = "UserSub_id", nullable = false)
-    private User_Subscription userId;
+    private User_Subscription userSubscription;
     @Column(name = "Amount", nullable = false)
     private String amount;
     @Column(name = "Method", nullable = false)
 
     private String method;
-    @Column(name = "Trans_Code", nullable = false)
+    @Column(name = "Trans_Code", nullable = false, unique = true)
 
     private String transactionCode;
     @Column(name = "CreateDate", nullable = false)
 
-    public Date createDate;
+    private Date createDate;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
+
+
 }

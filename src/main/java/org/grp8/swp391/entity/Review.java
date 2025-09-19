@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 
 @Entity
 @Data
@@ -24,4 +26,7 @@ public class Review {
     @JoinColumn(name = "reviewd_user", nullable = false)
     private User reviewedUser;
     private String comment;
+    private int rate;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createDate;
 }

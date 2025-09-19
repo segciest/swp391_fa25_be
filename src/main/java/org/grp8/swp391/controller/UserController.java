@@ -1,9 +1,10 @@
 package org.grp8.swp391.controller;
 
 
-import org.grp8.swp391.dto.LoginRequest;
-import org.grp8.swp391.dto.LoginResponse;
+import org.grp8.swp391.dto.request.LoginRequest;
+import org.grp8.swp391.dto.response.LoginResponse;
 import org.grp8.swp391.entity.User;
+import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,8 @@ public class UserController {
             LoginResponse res = new LoginResponse();
             res.setUserName(user.getUserName());
             res.setUserEmail(user.getUserEmail());
-            res.setUserStatus(user.getUserStatus());
+            res.setUserStatus(user.getUserStatus().name());
+
             res.setDob(user.getDob());
             res.setRole(user.getRole());
 

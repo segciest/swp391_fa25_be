@@ -1,4 +1,4 @@
-package org.grp8.swp391.dto;
+package org.grp8.swp391.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

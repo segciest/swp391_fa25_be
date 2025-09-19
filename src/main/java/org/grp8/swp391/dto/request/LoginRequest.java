@@ -1,10 +1,8 @@
-package org.grp8.swp391.dto;
+package org.grp8.swp391.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
 
 @Data
 @AllArgsConstructor

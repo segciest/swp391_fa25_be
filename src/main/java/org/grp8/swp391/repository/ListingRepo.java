@@ -6,15 +6,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 
 public interface ListingRepo extends JpaRepository<Listing, String> {
     Listing findByListingId(String listingId);
 
-
     Page<Listing> findBySeller_UserID(String sellerId, Pageable pageable);
+    List<Listing> findBySeller_UserID(String sellerId);
 
     Page<Listing> findByStatus(ListingStatus status, Pageable pageable);
 
-    // hoặc tìm theo categoryId
     Page<Listing> findByCategory_CategoryId(Long categoryId, Pageable pageable);
+
+    Page<Listing> findByModelContainingIgnoreCase(String model, Pageable pageable);
+    Page<Listing> findByColorIgnoreCase(String color, Pageable pageable);
+    Page<Listing> findByBrandIgnoreCase(String brand, Pageable pageable);
+    Page<Listing> findByVehicleTypeIgnoreCase(String type, Pageable pageable);
+
+    Page<Listing> findByYearBetween(int startYear, int endYear, Pageable pageable);
+    Page<Listing> findByPriceBetween(Double min, Double max, Pageable pageable);
 }

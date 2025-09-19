@@ -81,9 +81,6 @@ public class SubService {
     }
 
 
-    public List<Subscription> deleteAll(){
-        return subRepo.findAll();
-    }
 
 
 }
