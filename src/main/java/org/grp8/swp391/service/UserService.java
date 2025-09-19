@@ -1,6 +1,7 @@
 package org.grp8.swp391.service;
 
 import org.grp8.swp391.entity.User;
+import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,10 @@ public class UserService {
         User user = userRepo.findByUserEmailAndUserPassword(email, password);
         if (user == null) {
             throw new RuntimeException("Invalid email or password");
+        }
+
+        if (user.getUserStatus() != UserStatus.ACTIVE) {
+            throw new RuntimeException("Your account is being Banned or Pending. Please contact admin for more information.");
         }
         return user;
     }
@@ -70,7 +75,7 @@ public class UserService {
         }
 
         if(user.getUserStatus()==null){
-            user.setUserStatus("Active");
+            user.setUserStatus(UserStatus.PENDING);
         }
 
         return userRepo.save(user);

@@ -1,0 +1,23 @@
+package org.grp8.swp391.repository;
+
+import org.grp8.swp391.entity.Payment;
+import org.grp8.swp391.entity.PaymentStatus;
+import org.grp8.swp391.entity.User_Subscription;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+@Repository
+public interface PaymentRepo extends JpaRepository<Payment, Long> {
+    Payment findByTransactionCode(String transactionCode);
+    List<Payment> findByStatus(PaymentStatus status);
+    List<Payment> findByMethod(String method);
+
+    List<Payment> findByUserSubscription(User_Subscription userSubscription);
+
+    List<Payment> findByUserSubscription_SubscriptionId_SubId(Long subId);
+
+    List<Payment> findByUserSubscription_User_UserID(String userId);
+
+
+}

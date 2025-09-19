@@ -76,12 +76,7 @@ public class SubController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @DeleteMapping("/deleteall")
-    public ResponseEntity<?> deleteAll() {
-        List<Subscription> sb = subService.findAll();
-        subService.deleteAll();
-        return ResponseEntity.ok().body(sb);
-    }
+
 
 
     @PostMapping("/Subscription")
@@ -99,6 +94,24 @@ public class SubController {
             User updateUser = userService.save(u);
             return ResponseEntity.ok().body(updateUser);
 
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/cacleSub")
+    public ResponseEntity<?> cancleSubscription(String userId,Long subId) {
+        try {
+             User u = userService.findUserById(userId);
+            if(u==null){
+                return ResponseEntity.badRequest().body("User not found");
+            }
+            Subscription sub = subService.findById(subId);
+            if(sub==null){
+                return ResponseEntity.badRequest().body("Subscription not found");
+            }
+            u.setSubid(null);
+            User updateUser = userService.save(u);
+            return ResponseEntity.ok().body(updateUser);
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }

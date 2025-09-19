@@ -8,8 +8,9 @@ import org.springframework.stereotype.Repository;
 public interface SubRepo extends JpaRepository<Subscription, Long> {
     Subscription findBySubName(String subName);
     Subscription findBySubId(Long subId);
-    Subscription deleteBySubId(Long subId);
+    void deleteBySubId(Long subId);
     Subscription findByStatus(String status);
+
 
 
 }

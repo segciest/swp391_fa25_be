@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
+import java.util.Date;
+
 
 @Service
 public class ListingService {
@@ -44,11 +46,82 @@ public class ListingService {
 
     public Listing updateById(String id, Listing lis) {
         Listing up = listingRepo.findById(id).orElseThrow(() -> new RuntimeException("Listing not found with id: " + id));
-        up.setTitle(lis.getTitle());
-        up.setDescription(lis.getDescription());
-        up.setPrice(lis.getPrice());
-        up.setStatus(lis.getStatus());
-        up.setCategory(lis.getCategory());
+        if (up == null) {
+            throw new RuntimeException("Listing not found with id: " + id);
+        }
+
+        if (lis.getTitle() != null) {
+            up.setTitle(lis.getTitle());
+        }
+        if (lis.getDescription() != null) {
+            up.setDescription(lis.getDescription());
+        }
+        if (lis.getBrand() != null) {
+            up.setBrand(lis.getBrand());
+        }
+        if (lis.getModel() != null) {
+            up.setModel(lis.getModel());
+        }
+        if (lis.getColor() != null) {
+            up.setColor(lis.getColor());
+        }
+        if (lis.getYear() != null) {
+            up.setYear(lis.getYear());
+        }
+        if (lis.getSeats() != null) {
+            up.setSeats(lis.getSeats());
+        }
+        if (lis.getVehicleType() != null) {
+            up.setVehicleType(lis.getVehicleType());
+        }
+        if (lis.getMileage() != null) {
+            up.setMileage(lis.getMileage());
+        }
+        if (lis.getBatteryCapacity() != null) {
+            up.setBatteryCapacity(lis.getBatteryCapacity());
+        }
+        if (lis.getCapacity() != null) {
+            up.setCapacity(lis.getCapacity());
+        }
+        if (lis.getVoltage() != null) {
+            up.setVoltage(lis.getVoltage());
+        }
+        if (lis.getCycleCount() != null) {
+            up.setCycleCount(lis.getCycleCount());
+        }
+        if (lis.getBatteryLifeRemaining() != null) {
+            up.setBatteryLifeRemaining(lis.getBatteryLifeRemaining());
+        }
+        if (lis.getPrice() != null) {
+            up.setPrice(lis.getPrice());
+        }
+        if (lis.getContract() != null) {
+            up.setContract(lis.getContract());
+        }
+        if (lis.getStatus() != null) {
+            up.setStatus(lis.getStatus());
+        }
+        if (lis.getCategory() != null) {
+            up.setCategory(lis.getCategory());
+        }
+
+        up.setUpdatedAt(new Date());
         return listingRepo.save(up);
+    }
+
+    public Listing findById(String id) {
+        return listingRepo.findById(id).orElse(null);
+    }
+
+    public Page<Listing> findByModel(String model, Pageable pageable) {
+        return listingRepo.findByModelContainingIgnoreCase(model, pageable);
+    }
+
+    public Page<Listing> findByColor(String color, Pageable pageable) {
+        return listingRepo.findByColorIgnoreCase(color, pageable);
+    }
+
+    public Page<Listing> findByBrand(String brand, Pageable pageable) {
+        return listingRepo.findByBrandIgnoreCase(brand, pageable);
     }
 }

@@ -17,7 +17,7 @@ public class User_Subscription {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "User_id", nullable = false)
-    private User userId;
+    private User user;
     @ManyToOne
     @JoinColumn(name = "Sub_id", nullable = false)
     private Subscription subscriptionId;
