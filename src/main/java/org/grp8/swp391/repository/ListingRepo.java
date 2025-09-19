@@ -18,6 +18,7 @@ public interface ListingRepo extends JpaRepository<Listing, String> {
     Page<Listing> findByStatus(ListingStatus status, Pageable pageable);
 
     Page<Listing> findByCategory_CategoryId(Long categoryId, Pageable pageable);
+    Page<Listing> findByYear(Integer year, Pageable pageable);
 
     Page<Listing> findByModelContainingIgnoreCase(String model, Pageable pageable);
     Page<Listing> findByColorIgnoreCase(String color, Pageable pageable);
