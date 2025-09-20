@@ -1,6 +1,7 @@
 package org.grp8.swp391.controller;
 
 
+import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.LoginRequest;
 import org.grp8.swp391.dto.response.LoginResponse;
 import org.grp8.swp391.entity.User;
@@ -17,6 +18,11 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
@@ -59,6 +65,8 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             User user = userService.login(request.getUserEmail(), request.getUserPassword());
+            String token = jwtUtils.generateToken(user.getUserEmail(),user.getRole().getRoleName());
+
 
             LoginResponse res = new LoginResponse();
             res.setUserName(user.getUserName());
@@ -67,7 +75,7 @@ public class UserController {
 
             res.setDob(user.getDob());
             res.setRole(user.getRole());
-
+            res.setToken(token);
             return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

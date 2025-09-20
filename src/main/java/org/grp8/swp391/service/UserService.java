@@ -4,6 +4,7 @@ import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,9 +15,16 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public User login(String email, String password) {
-        User user = userRepo.findByUserEmailAndUserPassword(email, password);
+        User user = userRepo.findByUserEmail(email);
         if (user == null) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        if (!passwordEncoder.matches(password, user.getUserPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 
@@ -26,7 +34,7 @@ public class UserService {
         return user;
     }
 
-    public User findByUser_Email(String email){
+    public User findByUserEmail(String email){
 
 
         return userRepo.findByUserEmail(email);
@@ -34,6 +42,9 @@ public class UserService {
 
     public void deleteById(String id){
         User check = userRepo.findByUserID(id);
+        if (check == null) {
+            throw new RuntimeException("User not found with id: " + id);
+        }
         userRepo.delete(check);
     }
 
@@ -53,8 +64,8 @@ public class UserService {
         if (up.getUserEmail() != null) {
             check.setUserEmail(up.getUserEmail());
         }
-        if (up.getUserPassword() != null) {
-            check.setUserPassword(up.getUserPassword());
+        if (up.getUserPassword() != null && !up.getUserPassword().isBlank()) {
+            check.setUserPassword(passwordEncoder.encode(up.getUserPassword()));
         }
         if (up.getDob() != null) {
             check.setDob(up.getDob());
@@ -77,6 +88,7 @@ public class UserService {
         if(user.getUserStatus()==null){
             user.setUserStatus(UserStatus.PENDING);
         }
+        user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
 
         return userRepo.save(user);
 
