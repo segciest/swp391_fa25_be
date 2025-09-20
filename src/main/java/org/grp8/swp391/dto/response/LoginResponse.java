@@ -16,4 +16,5 @@ public class LoginResponse {
     private Date dob;
     private Role role;
     private String userStatus;
+    private String token;
 }
