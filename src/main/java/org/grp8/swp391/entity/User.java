@@ -44,7 +44,7 @@ public class User {
     private String phone;
 
     @ManyToOne
-    @JoinColumn(name = "Subscription_id", nullable = false)
+    @JoinColumn(name = "Subscription_id")
     private Subscription subid;
 
     @Column(name = "Status", nullable = false)
