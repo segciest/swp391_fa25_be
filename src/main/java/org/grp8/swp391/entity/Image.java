@@ -15,6 +15,6 @@ public class Image {
     private Long imageId;
     @ManyToOne
     @JoinColumn (name="listing_Id",nullable=false)
-    private Listing listing_Id;
+    private Listing listingId;
     private String url;
 }

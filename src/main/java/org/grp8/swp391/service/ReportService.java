@@ -22,15 +22,7 @@ public class ReportService {
         return reportRepo.save(report);
     }
 
-    public Report updateReportStatus(Long id,ReportedStatus report){
-        Report up =  reportRepo.findById(id).orElse(null);
-        if(up == null){
-            throw new EntityNotFoundException("Report not found with id " + id);
-        }
-        up.setStatus(report);
-        return reportRepo.save(up);
 
-    }
 
     public List<Report> getAllReports() {
         return reportRepo.findAll();
@@ -55,6 +47,24 @@ public class ReportService {
             throw new EntityNotFoundException("Report not found with id " + id);
         }
         reportRepo.delete(report);
+    }
+
+    public Report findByReportId(Long id){
+        return reportRepo.findByReportId(id);
+    }
+
+
+    public Report updateReport(Long id, Report report) {
+        Report check = reportRepo.findByReportId(id);
+        if (check == null) {
+            throw new EntityNotFoundException("Report not found with id " + id);
+        }
+
+        if (report.getReason() != null) {
+            check.setReason(report.getReason());
+        }
+
+        return reportRepo.save(check);
     }
 
 

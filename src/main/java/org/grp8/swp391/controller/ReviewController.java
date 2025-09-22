@@ -34,6 +34,7 @@ public class ReviewController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateReview(@PathVariable Long id, Review re){
         try{
+
             Review updated = reviewService.updateReview(id,re);
             return ResponseEntity.ok().body(re);
         }catch(RuntimeException e){
