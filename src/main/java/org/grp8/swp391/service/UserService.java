@@ -1,7 +1,9 @@
 package org.grp8.swp391.service;
 
+import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.UserStatus;
+import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +19,10 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private SubRepo subRepo;
+
 
     public User login(String email, String password) {
         User user = userRepo.findByUserEmail(email);
@@ -88,6 +94,15 @@ public class UserService {
         if(user.getUserStatus()==null){
             user.setUserStatus(UserStatus.PENDING);
         }
+
+        if (user.getSubid() != null && user.getSubid().getSubId() != null) {
+            Subscription sub = subRepo.findById(user.getSubid().getSubId())
+                    .orElseThrow(() -> new RuntimeException("Subscription not found"));
+            user.setSubid(sub);
+        } else {
+            user.setSubid(null);
+        }
+
         user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
 
         return userRepo.save(user);

@@ -46,14 +46,13 @@ public class ListingService {
     }
 
     public Listing create(Listing listing) {
+        listing.setCreatedAt(new Date());
         return listingRepo.save(listing);
     }
 
     public Listing updateById(String id, Listing lis) {
         Listing up = listingRepo.findById(id).orElseThrow(() -> new RuntimeException("Listing not found with id: " + id));
-        if (up == null) {
-            throw new RuntimeException("Listing not found with id: " + id);
-        }
+
 
         if (lis.getTitle() != null) {
             up.setTitle(lis.getTitle());
@@ -115,7 +114,7 @@ public class ListingService {
     }
 
     public Listing findById(String id) {
-        return listingRepo.findById(id).orElse(null);
+        return listingRepo.findById(id).orElseThrow(() -> new RuntimeException("Listing not found with id: " + id));
     }
 
     public Page<Listing> findByModel(String model, Pageable pageable) {

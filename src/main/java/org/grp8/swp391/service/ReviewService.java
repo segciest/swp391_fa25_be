@@ -16,6 +16,10 @@ public class ReviewService {
     @Autowired
     private ReviewRepo reviewRepo;
 
+    public Review findById(Long reviewId){
+        return reviewRepo.findByReviewId(reviewId);
+    }
+
     public List<Review> getAll(){
         return reviewRepo.findAll();
     }
@@ -35,6 +39,28 @@ public class ReviewService {
     public Review createReview(Review review){
         review.setCreateDate(new Date());
         return reviewRepo.save(review);
+    }
+
+    public void deleteReview(Long id){
+        reviewRepo.deleteByReviewId(id);
+
+    }
+
+    public Review updateReview(Long id,Review review){
+        Review check = reviewRepo.findByReviewId(id);
+        if(check == null){
+            throw new RuntimeException("Review not found");
+        }
+
+        if(check.getComment()!=null){
+            check.setComment(review.getComment().trim());
+        }
+
+        if(check.getRate() > 0){
+            check.setRate(review.getRate());
+        }
+        check.setCreateDate(new Date());
+        return reviewRepo.save(check);
     }
 
 }

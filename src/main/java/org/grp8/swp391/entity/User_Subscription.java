@@ -14,7 +14,7 @@ import java.util.Date;
 public class User_Subscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userSubId;
     @ManyToOne
     @JoinColumn(name = "User_id", nullable = false)
     private User user;

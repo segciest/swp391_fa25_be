@@ -47,7 +47,7 @@ public class ListController {
         return ResponseEntity.ok(listingService.updateById(id, listing));
     }
     @PostMapping("/create")
-    public ResponseEntity<?>  create(Listing listing) {
+    public ResponseEntity<?>  create(@RequestBody Listing listing) {
         return ResponseEntity.ok(listingService.create(listing));
     }
     @GetMapping("/seller/{id}")
@@ -56,7 +56,7 @@ public class ListController {
         Page<Listing> listings = listingService.findBySellerId(id, pageable);
         return ResponseEntity.ok(listings);
     }
-    @GetMapping("/seller/{status}")
+    @GetMapping("/status/{status}")
     public ResponseEntity<?> getByStatus(@PathVariable ListingStatus status,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size) {
