@@ -16,13 +16,10 @@ public class UserService {
 
     @Autowired
     private UserRepo userRepo;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Autowired
     private SubRepo subRepo;
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public User login(String email, String password) {
         User user = userRepo.findByUserEmail(email);
@@ -94,15 +91,11 @@ public class UserService {
         if(user.getUserStatus()==null){
             user.setUserStatus(UserStatus.PENDING);
         }
-
-        if (user.getSubid() != null && user.getSubid().getSubId() != null) {
-            Subscription sub = subRepo.findById(user.getSubid().getSubId())
-                    .orElseThrow(() -> new RuntimeException("Subscription not found"));
-            user.setSubid(sub);
-        } else {
-            user.setSubid(null);
+        if (user.getSubid() == null) {
+            Subscription defaultSub = subRepo.findById(1L)
+                    .orElseThrow(() -> new RuntimeException("Default subscription not found"));
+            user.setSubid(defaultSub);
         }
-
         user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
 
         return userRepo.save(user);

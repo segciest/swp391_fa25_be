@@ -13,36 +13,35 @@ import java.util.List;
 
 @Service
 public class SubService {
+
     @Autowired
     private SubRepo subRepo;
-
 
     @Autowired
     private UserRepo userRepo;
 
-
-    public Subscription findById(Long id){
-        return subRepo.findBySubId(id);
+    public Subscription findById(Long id) {
+        return subRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Subscription not found with id: " + id));
     }
 
-
-    public Subscription findByName(String name){
-        return  subRepo.findBySubName(name);
+    public Subscription findByName(String name) {
+        return subRepo.findBySubName(name);
     }
 
-    public List<Subscription> findAll(){
+    public List<Subscription> findAll() {
         return subRepo.findAll();
     }
 
-    public Subscription create(Subscription subscription){
+    public Subscription create(Subscription subscription) {
         return subRepo.save(subscription);
     }
 
-    public Subscription update(Subscription subscription){
+    public Subscription update(Subscription subscription) {
         return subRepo.save(subscription);
     }
 
-    public void deleteById(Long id){
+    public void deleteById(Long id) {
         subRepo.deleteById(id);
     }
 
@@ -50,37 +49,24 @@ public class SubService {
         return subRepo.findByStatus(status);
     }
 
-    public User subPackage(String userId,Long subId){
+    public User subPackage(String userId, Long subId) {
         User user = userRepo.findByUserID(userId);
-        if(user==null){
+        if (user == null) {
             throw new RuntimeException("User not found");
         }
 
-        Subscription sub = subRepo.findBySubId(subId);
-        if(sub==null){
-            throw new RuntimeException("Sub not found");
-        }
-
+        Subscription sub = findById(subId);
         user.setSubid(sub);
         return userRepo.save(user);
     }
 
-    public User canclePackage(String userId,Long subId){
+    public User cancelPackage(String userId) {
         User user = userRepo.findByUserID(userId);
-        if(user==null){
+        if (user == null) {
             throw new RuntimeException("User not found");
         }
-
-        Subscription sub = subRepo.findBySubId(subId);
-        if(sub==null){
-            throw new RuntimeException("Sub not found");
-        }
-
-        user.setSubid(null);
+        Subscription defaultSub = findById(1L);
+        user.setSubid(defaultSub);
         return userRepo.save(user);
     }
-
-
-
-
 }
