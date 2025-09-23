@@ -22,7 +22,7 @@ public class SubService {
 
 
     public Subscription findById(Long id){
-        return subRepo.findBySubId(id);
+        return subRepo.findById(id).orElseThrow(() -> new RuntimeException("Subscription not found with id: " + id));
     }
 
 
