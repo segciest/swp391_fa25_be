@@ -52,11 +52,11 @@ public class ReviewService {
             throw new RuntimeException("Review not found");
         }
 
-        if(check.getComment()!=null){
+        if(review.getComment()!=null){
             check.setComment(review.getComment().trim());
         }
 
-        if(check.getRate() > 0){
+        if(review.getRate() > 0){
             check.setRate(review.getRate());
         }
         check.setCreateDate(new Date());
