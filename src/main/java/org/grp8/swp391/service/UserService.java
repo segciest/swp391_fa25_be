@@ -30,7 +30,7 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        if (!passwordEncoder.matches(password, user.getUserPassword())) {
+        if (!passwordEncoder.matches(password, user.getUserPasswordEnconde())) {
             throw new RuntimeException("Invalid email or password");
         }
 
@@ -71,7 +71,8 @@ public class UserService {
             check.setUserEmail(up.getUserEmail());
         }
         if (up.getUserPassword() != null && !up.getUserPassword().isBlank()) {
-            check.setUserPassword(passwordEncoder.encode(up.getUserPassword()));
+            check.setUserPassword(up.getUserPassword());
+            check.setUserPasswordEnconde(passwordEncoder.encode(up.getUserPassword()));
         }
         if (up.getDob() != null) {
             check.setDob(up.getDob());
@@ -102,8 +103,9 @@ public class UserService {
         } else {
             user.setSubid(null);
         }
-
-        user.setUserPassword(passwordEncoder.encode(user.getUserPassword()));
+        String defaultPass = user.getUserPassword();
+        user.setUserPassword(defaultPass);
+        user.setUserPasswordEnconde(passwordEncoder.encode(defaultPass));
 
         return userRepo.save(user);
 

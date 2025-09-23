@@ -15,7 +15,7 @@ public class PaymentService {
     @Autowired
     private PaymentRepo paymentRepo;
 
-    public List<Payment> findAll() {
+    public List<Payment> getAll() {
         return paymentRepo.findAll();
     }
 
