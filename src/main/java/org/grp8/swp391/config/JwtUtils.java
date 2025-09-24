@@ -29,17 +29,14 @@ public class JwtUtils {
                 .compact();
     }
 
-    // Lấy username từ token
     public String getUsernameFromToken(String token) {
         return parseClaims(token).getSubject();
     }
 
-    // Lấy role từ token
     public String getRoleFromToken(String token) {
         return (String) parseClaims(token).get("role");
     }
 
-    // Kiểm tra token
     public boolean checkValidToken(String token) {
         try {
             parseClaims(token);
@@ -49,10 +46,9 @@ public class JwtUtils {
         }
     }
 
-    // Parse token -> Claims
     private Claims parseClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(jp.getSecret().getBytes())
+        return Jwts.parserBuilder()
+                .setSigningKey(jp.getSecret().getBytes()).build()
                 .parseClaimsJws(token)
                 .getBody();
     }

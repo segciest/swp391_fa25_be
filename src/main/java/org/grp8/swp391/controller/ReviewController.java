@@ -17,26 +17,26 @@ public class ReviewController {
 
     @Autowired
     private ReviewService reviewService;
-
-    public ResponseEntity<?> getReviewById(Long reviewId){
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<?> getReviewById(@PathVariable Long reviewId){
         Review re = reviewService.findById(reviewId);
         return ResponseEntity.ok().body(re);
     }
     @PostMapping("/create")
-    public ResponseEntity<?> createReview(Review re){
+    public ResponseEntity<?> createReview(@RequestBody Review re){
         try{
            Review save = reviewService.createReview(re);
-           return ResponseEntity.ok().body(re);
+           return ResponseEntity.ok().body(save);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateReview(@PathVariable Long id, Review re){
+    public ResponseEntity<?> updateReview(@PathVariable Long id,@RequestBody Review re){
         try{
 
             Review updated = reviewService.updateReview(id,re);
-            return ResponseEntity.ok().body(re);
+            return ResponseEntity.ok().body(updated);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -57,7 +57,32 @@ public class ReviewController {
         return reviewService.getAll();
     }
 
+    @GetMapping("/listing/{listingId}")
+    public ResponseEntity<?> getReviewsByListing(@PathVariable String listingId) {
+        try {
+            return ResponseEntity.ok(reviewService.findByListingId(listingId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
+    @GetMapping("/reviewer/{userId}")
+    public ResponseEntity<?> getReviewsByReviewer(@PathVariable String userId) {
+        try {
+            return ResponseEntity.ok(reviewService.findByReviewerId(userId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/reviewed/{userId}")
+    public ResponseEntity<?> getReviewsAboutUser(@PathVariable String userId) {
+        try {
+            return ResponseEntity.ok(reviewService.findByReviewedUserId(userId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 
 }

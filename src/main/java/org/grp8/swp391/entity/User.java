@@ -1,7 +1,9 @@
 package org.grp8.swp391.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,28 +23,29 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "Id", nullable = false)
     private String userID;
+    @NotBlank
     @Column(name = "Name", nullable = false,columnDefinition = "NVARCHAR(100)")
     private String userName;
+    @NotBlank
 
-    @Column(name = "Email", nullable = false)
+    @Column(name = "Email", nullable = false,unique = true)
     @Email
     private String userEmail;
+    @JsonIgnore
+    @NotBlank
+
     @Column(name = "Password", nullable = false)
     private String userPassword;
-    @Column(name = "PasswordEncode",nullable = true)
-    private String userPasswordEnconde;
+
     @Column(name = "DoB", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dob;
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-
-    @Column(name = "Phone", nullable = false, length = 10)
-    @Pattern(
-            regexp = "^(0[3|5|7|8|9])[0-9]{8}$",
-            message = "Invalid phone number"
-    )
+    @NotBlank
+    @Column(name = "Phone", nullable = false, length = 10,unique = true)
+    @Pattern( regexp = "^(0[3|5|7|8|9])[0-9]{8}$",message = "Invalid phone number")
     private String phone;
 
     @ManyToOne

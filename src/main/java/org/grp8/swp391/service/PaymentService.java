@@ -35,13 +35,24 @@ public class PaymentService {
         return paymentRepo.findByUserSubscription(user_subscription);
     }
 
-    public List<Payment> findUserSubBySubId(Long subId){
-        return paymentRepo.findByUserSubscription_SubscriptionId_SubId(subId);
+
+
+
+
+    public Payment create (Payment payment) {
+        return paymentRepo.save(payment);
     }
 
-    public List<Payment> findSubByUser(String id){
-        return paymentRepo.findByUserSubscription_User_UserID(id);
+    public void deletePaymentById(Long id) {
+        paymentRepo.deleteById(id);
     }
 
+    public Payment findPaymentById(Long id) {
+        return paymentRepo.findByPaymentId(id);
+    }
+
+    public Payment updatePayment(Payment payment) {
+        return paymentRepo.save(payment);
+    }
 
 }
