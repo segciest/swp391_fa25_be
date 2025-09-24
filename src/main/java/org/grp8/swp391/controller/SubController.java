@@ -38,23 +38,27 @@ public class SubController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PostMapping("/{name}")
-    public ResponseEntity<?> findByName(@PathVariable String name) {
+
+    @GetMapping("/name")
+    public ResponseEntity<?> findByName(@RequestParam String name) {
         try {
-            Subscription subs = subService.findByName(name);
-            return ResponseEntity.ok().body(subs);
-        }catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    @PostMapping("/updateSub")
-    public ResponseEntity<?> updateSubscription(Subscription subscription) {
-        try {
-            Subscription sub = subService.update(subscription);
+            Subscription sub = subService.findByName(name);
             return ResponseEntity.ok().body(sub);
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PutMapping("/updateSub/{id}")
+    public ResponseEntity<?> updateSubscription(@PathVariable Long id ,@RequestBody Subscription subscription) {
+        try {
+            Subscription sub = subService.findById(id);
+            return ResponseEntity.ok(subService.update(subscription));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+
     }
 
     @PostMapping("/create")
@@ -80,7 +84,7 @@ public class SubController {
 
 
     @PostMapping("/Subscription")
-    public ResponseEntity<?> SubPackage(String userId, Long subId) {
+    public ResponseEntity<?> SubPackage(@RequestParam String userId,@RequestParam Long subId) {
         try{
             User u = userService.findUserById(userId);
             if(u==null){
@@ -98,7 +102,7 @@ public class SubController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PostMapping("/cacleSub")
+    @PutMapping("/cacleSub")
     public ResponseEntity<?> cancleSubscription(String userId,Long subId) {
         try {
              User u = userService.findUserById(userId);

@@ -63,4 +63,18 @@ public class ReviewService {
         return reviewRepo.save(check);
     }
 
+    public List<Review> findByListingId(String listingId) {
+        return reviewRepo.findByListing_ListingId(listingId);
+    }
+
+    // Tìm review do một user viết
+    public List<Review> findByReviewerId(String userId) {
+        return reviewRepo.findByReviewer_UserID(userId);
+    }
+
+    // Tìm review về một user nào đó
+    public List<Review> findByReviewedUserId(String userId) {
+        return reviewRepo.findByReviewedUser_UserID(userId);
+    }
+
 }

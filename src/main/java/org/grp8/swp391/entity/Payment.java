@@ -20,7 +20,7 @@ public class Payment {
     @JoinColumn(name = "UserSub_id", nullable = false)
     private User_Subscription userSubscription;
     @Column(name = "Amount", nullable = false)
-    private String amount;
+    private Double amount;
     @Column(name = "Method", nullable = false)
 
     private String method;
@@ -28,7 +28,7 @@ public class Payment {
 
     private String transactionCode;
     @Column(name = "CreateDate", nullable = false)
-
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createDate;
 
     @Enumerated(EnumType.STRING)

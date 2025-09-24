@@ -1,8 +1,10 @@
 package org.grp8.swp391.controller;
 
 
+import jakarta.validation.Valid;
 import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.LoginRequest;
+import org.grp8.swp391.dto.request.RegisterRequest;
 import org.grp8.swp391.dto.response.LoginResponse;
 import org.grp8.swp391.dto.response.RegisterResponse;
 import org.grp8.swp391.entity.User;
@@ -26,10 +28,17 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         try{
-            User newUser = userService.registerUser(user);
-            return ResponseEntity.ok(newUser);
+            User newUser = userService.registerUser(req);
+            RegisterResponse res = new RegisterResponse();
+            res.setUserId(newUser.getUserID());
+            res.setUserName(newUser.getUserName());
+            res.setUserEmail(newUser.getUserEmail());
+            res.setPhone(newUser.getPhone());
+            res.setRoleName(newUser.getRole());
+            res.setStatus(newUser.getUserStatus());
+            return ResponseEntity.ok(res);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -45,15 +54,24 @@ public class UserController {
         User user = userService.findUserById(id);
         return ResponseEntity.ok(user);
     }
+    @PutMapping("/status/{id}")
+    public ResponseEntity<?> updateUserStatus(@PathVariable String id, @RequestParam String status){
+        try {
+            UserStatus newStatus = UserStatus.valueOf(status.toUpperCase());
+            User user = userService.updateUSerStatus(id, newStatus);
+            return ResponseEntity.ok(user);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@RequestBody User us, @PathVariable String id){
+    public ResponseEntity<?> updateUser(@Valid @RequestBody User us, @PathVariable String id){
         try{
             User u = userService.updateUser(us,id);
             RegisterResponse res = new RegisterResponse();
             res.setUserId(u.getUserID());
             res.setUserName(u.getUserName());
-            res.setUserEmail(u.getUserEmail());
             res.setPhone(u.getPhone());
             res.setUserEmail(u.getUserEmail());
             res.setRoleName(u.getRole());
