@@ -4,6 +4,7 @@ package org.grp8.swp391.controller;
 import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.LoginRequest;
 import org.grp8.swp391.dto.response.LoginResponse;
+import org.grp8.swp391.dto.response.RegisterResponse;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.service.UserService;
@@ -35,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public List<User> getAllUser(User user) {
+    public List<User> getAllUser() {
         return userService.getAllUsers();
     }
 
@@ -49,15 +50,26 @@ public class UserController {
     public ResponseEntity<?> updateUser(@RequestBody User us, @PathVariable String id){
         try{
             User u = userService.updateUser(us,id);
-            return ResponseEntity.ok(u);
+            RegisterResponse res = new RegisterResponse();
+            res.setUserId(u.getUserID());
+            res.setUserName(u.getUserName());
+            res.setUserEmail(u.getUserEmail());
+            res.setPhone(u.getPhone());
+            res.setUserEmail(u.getUserEmail());
+            res.setRoleName(u.getRole());
+            res.setStatus(u.getUserStatus());
+
+
+            return ResponseEntity.ok(res);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable String id){
+    public ResponseEntity<?> deleteUser(@PathVariable String id){
         User u = userService.findUserById(id);
         userService.deleteById(id);
+        return  ResponseEntity.ok(u);
     }
 
 

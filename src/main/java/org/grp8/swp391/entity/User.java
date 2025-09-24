@@ -29,6 +29,8 @@ public class User {
     private String userEmail;
     @Column(name = "PasswordEncode", nullable = false)
     private String userPassword;
+    @Column(name = "PasswordEncode",nullable = true)
+    private String userPasswordEnconde;
     @Column(name = "DoB", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dob;
