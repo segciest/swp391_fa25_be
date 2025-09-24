@@ -27,7 +27,7 @@ public class User {
     @Column(name = "Email", nullable = false)
     @Email
     private String userEmail;
-    @Column(name = "Password", nullable = false)
+    @Column(name = "PasswordEncode", nullable = false)
     private String userPassword;
     @Column(name = "DoB", nullable = false)
     @Temporal(TemporalType.DATE)
