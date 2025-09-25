@@ -27,7 +27,7 @@ public class User {
     @Column(name = "Email", nullable = false)
     @Email
     private String userEmail;
-    @Column(name = "PasswordEncode", nullable = false)
+    @Column(name = "Password", nullable = false)
     private String userPassword;
     @Column(name = "PasswordEncode",nullable = true)
     private String userPasswordEnconde;
