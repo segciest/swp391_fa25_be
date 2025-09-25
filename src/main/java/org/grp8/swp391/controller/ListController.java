@@ -34,6 +34,19 @@ public class ListController {
         }
     }
 
+    @PutMapping("/status/{id}")
+    public ResponseEntity<?> updateListingStatus(@PathVariable String id, @RequestParam String status) {
+        try {
+            ListingStatus lisStatus = ListingStatus.valueOf(status.toUpperCase());
+            Listing lis = listingService.updateListingStatus(id, lisStatus);
+            return ResponseEntity.ok(lis);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid status value: " + status);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
 
     @DeleteMapping("/delete/{id}")
