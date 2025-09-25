@@ -3,7 +3,6 @@ package org.grp8.swp391.controller;
 import org.grp8.swp391.entity.Payment;
 import org.grp8.swp391.entity.PaymentStatus;
 import org.grp8.swp391.entity.User_Subscription;
-import org.grp8.swp391.repository.PaymentRepo;
 import org.grp8.swp391.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +23,8 @@ public class PaymentController {
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updatePayment(@PathVariable Long id,@RequestBody Payment payment) {
         try{
-            Payment pay = paymentService.findPaymentById(id);
-            paymentService.updatePayment(pay);
-            return ResponseEntity.ok().build();
+            Payment pay = paymentService.updatePayment(id, payment);
+            return ResponseEntity.ok(pay);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().build();
         }
@@ -57,7 +55,7 @@ public class PaymentController {
     }
     @GetMapping("/status")
 
-    public ResponseEntity<?> findByStatus(PaymentStatus status){
+    public ResponseEntity<?> findByStatus(@RequestParam PaymentStatus status){
         try {
             List<Payment> pay = paymentService.findByStatus(status);
             return ResponseEntity.ok().body(pay);
@@ -84,9 +82,9 @@ public class PaymentController {
         }
     }
     @GetMapping("/user")
-    public ResponseEntity<?> findByUserSubscription( User_Subscription  userSubscription){
+    public ResponseEntity<?> findByUserSubscription(User_Subscription userSubId){
         try{
-            List<Payment> pay = paymentService.findByUSerSubscription(userSubscription);
+            List<Payment> pay = paymentService.findByUSerSubscription(userSubId);
             return ResponseEntity.ok().body(pay);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().build();

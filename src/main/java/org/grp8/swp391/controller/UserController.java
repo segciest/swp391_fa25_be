@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.LoginRequest;
 import org.grp8.swp391.dto.request.RegisterRequest;
+import org.grp8.swp391.dto.request.UpdateUserRequest;
 import org.grp8.swp391.dto.response.LoginResponse;
 import org.grp8.swp391.dto.response.RegisterResponse;
 import org.grp8.swp391.entity.User;
@@ -66,7 +67,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@Valid @RequestBody User us, @PathVariable String id){
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UpdateUserRequest us, @PathVariable String id){
         try{
             User u = userService.updateUser(us,id);
             RegisterResponse res = new RegisterResponse();
@@ -108,6 +109,17 @@ public class UserController {
             res.setToken(token);
             return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @PutMapping("/role/{id}")
+    public ResponseEntity<?> updateRole(@PathVariable String id,@RequestParam Long roleId){
+        try{
+            User u = userService.updateUserRole(id,roleId);
+            return ResponseEntity.ok(u);
+        }catch(RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

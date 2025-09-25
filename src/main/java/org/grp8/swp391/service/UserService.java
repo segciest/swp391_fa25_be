@@ -1,6 +1,7 @@
 package org.grp8.swp391.service;
 
 import org.grp8.swp391.dto.request.RegisterRequest;
+import org.grp8.swp391.dto.request.UpdateUserRequest;
 import org.grp8.swp391.entity.Role;
 import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
@@ -29,6 +30,19 @@ public class UserService {
 
     @Autowired
     private RoleRepo roleRepo;
+
+    public User updateUserRole(String id, Long roleId){
+        User u = userRepo.findByUserID(id);
+        if(u == null){
+            throw new RuntimeException("User not found with id: " + id);
+        }
+        Role role = roleRepo.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+        u.setRole(role);
+        return userRepo.save(u);
+
+
+    }
+
 
     public User updateUSerStatus(String id, UserStatus userStatus){
         User u = userRepo.findByUserID(id);
@@ -74,7 +88,7 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    public User updateUser(User up, String id){
+    public User updateUser(UpdateUserRequest up, String id){
         User check = userRepo.findByUserID(id);
         if (check == null) {
             throw new RuntimeException("User not found with id: " + id);
@@ -89,18 +103,15 @@ public class UserService {
             }
             check.setUserEmail(up.getUserEmail());
         }
-        if (up.getUserPassword() != null && !up.getUserPassword().isBlank()) {
-            check.setUserPassword(up.getUserPassword());
-            check.setUserPassword(passwordEncoder.encode(up.getUserPassword()));
+        if (up.getPassword() != null && !up.getPassword().isBlank()) {
+            check.setUserPassword(passwordEncoder.encode(up.getPassword()));
         }
         if (up.getDob() != null) {
             check.setDob(up.getDob());
         }
-        if (up.getUserStatus() != null) {
-            check.setUserStatus(up.getUserStatus());
-        }
-        if (up.getRole() != null) {
-            check.setRole(up.getRole());
+
+        if (up.getPhone() != null) {
+            check.setPhone(up.getPhone());
         }
 
         return userRepo.save(check);

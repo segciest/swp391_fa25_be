@@ -1,6 +1,7 @@
 package org.grp8.swp391.service;
 
 import org.grp8.swp391.entity.Role;
+import org.grp8.swp391.entity.RoleType;
 import org.grp8.swp391.repository.RoleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
