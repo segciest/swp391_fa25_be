@@ -51,8 +51,32 @@ public class PaymentService {
         return paymentRepo.findByPaymentId(id);
     }
 
-    public Payment updatePayment(Payment payment) {
-        return paymentRepo.save(payment);
+    public Payment updatePayment(Long id,Payment payment) {
+       Payment pay = paymentRepo.findByPaymentId(id);
+       if(pay==null){
+           throw new RuntimeException("Payment not found");
+       }
+
+        if (payment.getAmount() != null) {
+            pay.setAmount(payment.getAmount());
+        }
+        if (payment.getMethod() != null) {
+            pay.setMethod(payment.getMethod());
+        }
+        if (payment.getTransactionCode() != null) {
+            pay.setTransactionCode(payment.getTransactionCode());
+        }
+        if (payment.getStatus() != null) {
+            pay.setStatus(payment.getStatus());
+        }
+        if (payment.getUserSubscription() != null) {
+            pay.setUserSubscription(payment.getUserSubscription());
+        }
+
+        return paymentRepo.save(pay);
+
     }
+
+
 
 }

@@ -1,6 +1,7 @@
 package org.grp8.swp391.repository;
 
 import org.grp8.swp391.entity.Role;
+import org.grp8.swp391.entity.RoleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
