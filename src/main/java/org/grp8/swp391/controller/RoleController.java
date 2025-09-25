@@ -3,6 +3,7 @@ package org.grp8.swp391.controller;
 
 import org.grp8.swp391.entity.Role;
 
+import org.grp8.swp391.entity.RoleType;
 import org.grp8.swp391.service.RoleService;
 import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

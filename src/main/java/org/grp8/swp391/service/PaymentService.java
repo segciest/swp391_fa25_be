@@ -35,13 +35,48 @@ public class PaymentService {
         return paymentRepo.findByUserSubscription(user_subscription);
     }
 
-    public List<Payment> findUserSubBySubId(Long subId){
-        return paymentRepo.findByUserSubscription_SubscriptionId_SubId(subId);
+
+
+
+
+    public Payment create (Payment payment) {
+        return paymentRepo.save(payment);
     }
 
-    public List<Payment> findSubByUser(String id){
-        return paymentRepo.findByUserSubscription_User_UserID(id);
+    public void deletePaymentById(Long id) {
+        paymentRepo.deleteById(id);
     }
+
+    public Payment findPaymentById(Long id) {
+        return paymentRepo.findByPaymentId(id);
+    }
+
+    public Payment updatePayment(Long id,Payment payment) {
+       Payment pay = paymentRepo.findByPaymentId(id);
+       if(pay==null){
+           throw new RuntimeException("Payment not found");
+       }
+
+        if (payment.getAmount() != null) {
+            pay.setAmount(payment.getAmount());
+        }
+        if (payment.getMethod() != null) {
+            pay.setMethod(payment.getMethod());
+        }
+        if (payment.getTransactionCode() != null) {
+            pay.setTransactionCode(payment.getTransactionCode());
+        }
+        if (payment.getStatus() != null) {
+            pay.setStatus(payment.getStatus());
+        }
+        if (payment.getUserSubscription() != null) {
+            pay.setUserSubscription(payment.getUserSubscription());
+        }
+
+        return paymentRepo.save(pay);
+
+    }
+
 
 
 }

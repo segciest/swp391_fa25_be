@@ -1,8 +1,12 @@
 package org.grp8.swp391.service;
 
+import org.grp8.swp391.dto.request.RegisterRequest;
+import org.grp8.swp391.dto.request.UpdateUserRequest;
+import org.grp8.swp391.entity.Role;
 import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.UserStatus;
+import org.grp8.swp391.repository.RoleRepo;
 import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +28,39 @@ public class UserService {
     private SubRepo subRepo;
 
 
+    @Autowired
+    private RoleRepo roleRepo;
+
+    public User updateUserRole(String id, Long roleId){
+        User u = userRepo.findByUserID(id);
+        if(u == null){
+            throw new RuntimeException("User not found with id: " + id);
+        }
+        Role role = roleRepo.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+        u.setRole(role);
+        return userRepo.save(u);
+
+
+    }
+
+
+    public User updateUSerStatus(String id, UserStatus userStatus){
+        User u = userRepo.findByUserID(id);
+        if(u == null){
+            throw new RuntimeException("User not found with id: " + id);
+        }
+        u.setUserStatus(userStatus);
+        return userRepo.save(u);
+    }
+
+
     public User login(String email, String password) {
         User user = userRepo.findByUserEmail(email);
         if (user == null) {
             throw new RuntimeException("Invalid email or password");
         }
 
-        if (!passwordEncoder.matches(password, user.getUserPasswordEnconde())) {
+        if (!passwordEncoder.matches(password, user.getUserPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 
@@ -58,7 +88,7 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    public User updateUser(User up, String id){
+    public User updateUser(UpdateUserRequest up, String id){
         User check = userRepo.findByUserID(id);
         if (check == null) {
             throw new RuntimeException("User not found with id: " + id);
@@ -67,48 +97,54 @@ public class UserService {
         if (up.getUserName() != null) {
             check.setUserName(up.getUserName());
         }
-        if (up.getUserEmail() != null) {
+        if (up.getUserEmail() != null && !up.getUserEmail().equalsIgnoreCase(check.getUserEmail())) {
+            if (userRepo.findByUserEmail(up.getUserEmail()) != null) {
+                throw new RuntimeException("Email already in use");
+            }
             check.setUserEmail(up.getUserEmail());
         }
-        if (up.getUserPassword() != null && !up.getUserPassword().isBlank()) {
-            check.setUserPassword(up.getUserPassword());
-            check.setUserPasswordEnconde(passwordEncoder.encode(up.getUserPassword()));
+        if (up.getPassword() != null && !up.getPassword().isBlank()) {
+            check.setUserPassword(passwordEncoder.encode(up.getPassword()));
         }
         if (up.getDob() != null) {
             check.setDob(up.getDob());
         }
-        if (up.getUserStatus() != null) {
-            check.setUserStatus(up.getUserStatus());
-        }
-        if (up.getRole() != null) {
-            check.setRole(up.getRole());
+
+        if (up.getPhone() != null) {
+            check.setPhone(up.getPhone());
         }
 
         return userRepo.save(check);
     }
 
-    public User registerUser(User user){
-        if(userRepo.findByUserEmail(user.getUserEmail())!=null){
+    public User registerUser(RegisterRequest req){
+        if (userRepo.findByUserEmail(req.getUserEmail()) != null) {
             throw new RuntimeException("User already exists");
         }
 
-        if(user.getUserStatus()==null){
-            user.setUserStatus(UserStatus.PENDING);
-        }
+        User user = new User();
+        user.setUserName(req.getUserName());
+        user.setUserEmail(req.getUserEmail());
+        user.setPhone(req.getPhone());
+        user.setDob(req.getDob());
+        user.setUserStatus(UserStatus.PENDING);
 
-        if (user.getSubid() != null && user.getSubid().getSubId() != null) {
-            Subscription sub = subRepo.findById(user.getSubid().getSubId())
+        Role defaultRole = roleRepo.findByRoleName("USER");
+        if (defaultRole == null) {
+            throw new RuntimeException("Default role USER not found");
+        }
+        user.setRole(defaultRole);
+
+        if (req.getSubId() != null) {
+            Subscription sub = subRepo.findById(req.getSubId())
                     .orElseThrow(() -> new RuntimeException("Subscription not found"));
             user.setSubid(sub);
-        } else {
-            user.setSubid(null);
         }
-        String defaultPass = user.getUserPassword();
-        user.setUserPassword(defaultPass);
-        user.setUserPasswordEnconde(passwordEncoder.encode(defaultPass));
+
+        // encode password
+        user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
 
         return userRepo.save(user);
-
     }
 
     public List<User> getAllUsers(){

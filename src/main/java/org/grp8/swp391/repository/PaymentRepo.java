@@ -13,11 +13,14 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     List<Payment> findByStatus(PaymentStatus status);
     List<Payment> findByMethod(String method);
 
+    Payment findByPaymentId(Long paymentId);
+
     List<Payment> findByUserSubscription(User_Subscription userSubscription);
 
     List<Payment> findByUserSubscription_SubscriptionId_SubId(Long subId);
 
     List<Payment> findByUserSubscription_User_UserID(String userId);
+
 
 
 }
