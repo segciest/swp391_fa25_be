@@ -111,6 +111,9 @@ public class UserService {
         }
 
         if (up.getPhone() != null) {
+            if (userRepo.findByPhone(up.getPhone()) != null) {
+                throw new RuntimeException("Phone already in use");
+            }
             check.setPhone(up.getPhone());
         }
 
@@ -125,6 +128,9 @@ public class UserService {
         User user = new User();
         user.setUserName(req.getUserName());
         user.setUserEmail(req.getUserEmail());
+        if (userRepo.findByPhone(req.getPhone()) != null) {
+            throw new RuntimeException("Phone already in use");
+        }
         user.setPhone(req.getPhone());
         user.setDob(req.getDob());
         user.setUserStatus(UserStatus.PENDING);
@@ -155,3 +161,4 @@ public class UserService {
         return userRepo.findByUserID(id);
     }
 }
+

@@ -113,6 +113,16 @@ public class ListingService {
         return listingRepo.save(up);
     }
 
+
+    public Listing updateListingStatus(String id, ListingStatus status) {
+        Listing lis = listingRepo.findByListingId(id);
+        if (lis == null) {
+            throw new RuntimeException("Listing not found with id: " + id);
+        }
+        lis.setStatus(status);
+        return listingRepo.save(lis);
+    }
+
     public Listing findById(String id) {
         return listingRepo.findById(id).orElseThrow(() -> new RuntimeException("Listing not found with id: " + id));
     }
