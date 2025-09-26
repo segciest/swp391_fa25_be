@@ -2,11 +2,9 @@ package org.grp8.swp391.controller;
 
 
 import org.grp8.swp391.entity.Review;
-import org.grp8.swp391.entity.User;
 import org.grp8.swp391.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
