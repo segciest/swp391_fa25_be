@@ -17,7 +17,7 @@ public class UserSubController {
     @Autowired
     private UserSubService userSubService;
     @PostMapping("/create")
-    public ResponseEntity<?> createUserSub(User_Subscription userSub) {
+    public ResponseEntity<?> createUserSub(@RequestBody User_Subscription userSub) {
         return ResponseEntity.ok(userSubService.createUserSub(userSub));
     }
     @DeleteMapping("/{id}")
@@ -38,13 +38,28 @@ public class UserSubController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUserSub(@PathVariable Long id,User_Subscription userSub) {
+    public ResponseEntity<?> updateUserSub(@PathVariable Long id,@RequestBody User_Subscription userSub) {
         try {
             userSubService.updateUserSub(id, userSub);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+
+    @GetMapping("/remainday/{userId}")
+    public ResponseEntity<?> getRemainingDays(@PathVariable String userId){
+        try{
+            User u = new User();
+            u.setUserID(userId);
+
+            int day = userSubService.getRemainingDate(u);
+            return ResponseEntity.ok().body(day);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 
 

@@ -26,7 +26,7 @@ public class Subscription {
     private String subPrice;
 
     @Column(name = "duration", nullable = false)
-    private String duration;
+    private int duration;
     @Column(name = "priority_level", nullable = false)
     private int priorityLevel;
 

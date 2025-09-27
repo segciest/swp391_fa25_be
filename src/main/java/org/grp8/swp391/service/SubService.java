@@ -3,11 +3,15 @@ package org.grp8.swp391.service;
 
 import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
+import org.grp8.swp391.entity.User_Subscription;
 import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
+import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -16,6 +20,8 @@ public class SubService {
     @Autowired
     private SubRepo subRepo;
 
+    @Autowired
+    private UserSubRepo userSubRepo;
 
     @Autowired
     private UserRepo userRepo;
@@ -60,6 +66,22 @@ public class SubService {
         if(sub==null){
             throw new RuntimeException("Sub not found");
         }
+
+        User_Subscription userSub = new User_Subscription();
+        userSub.setUser(user);
+        userSub.setSubscriptionId(sub);
+
+        Date date = new Date();
+        userSub.setStartDate(date);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DAY_OF_MONTH, sub.getDuration());
+        userSub.setEndDate(cal.getTime());
+
+        userSub.setStatus("ACTIVE");
+        userSubRepo.save(userSub);
+
 
         user.setSubid(sub);
         return userRepo.save(user);

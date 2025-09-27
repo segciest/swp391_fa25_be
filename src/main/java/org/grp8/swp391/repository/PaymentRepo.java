@@ -4,6 +4,8 @@ import org.grp8.swp391.entity.Payment;
 import org.grp8.swp391.entity.PaymentStatus;
 import org.grp8.swp391.entity.User_Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,6 +23,7 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
 
     List<Payment> findByUserSubscription_User_UserID(String userId);
 
-
+    @Query("SELECT p FROM Payment p WHERE p.userSubscription.user.userID = :userId")
+    List<Payment> findByUserId(@Param("userId") String userId);
 
 }
