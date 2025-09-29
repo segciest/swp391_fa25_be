@@ -82,5 +82,10 @@ public class ReviewController {
         }
     }
 
+    @GetMapping("/{userId}/rate")
+    public ResponseEntity<?> getReviewsRate(@PathVariable String userId) {
+        return ResponseEntity.ok(reviewService.getAverageRatingByListing(userId));
+    }
+
 
 }

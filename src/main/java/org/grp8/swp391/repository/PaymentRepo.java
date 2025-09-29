@@ -26,4 +26,8 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     @Query("SELECT p FROM Payment p WHERE p.userSubscription.user.userID = :userId")
     List<Payment> findByUserId(@Param("userId") String userId);
 
+    Long countByStatus(PaymentStatus status);
+    @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = :status")
+    Double sumAmountByStatus(@Param("status") PaymentStatus status);
+
 }

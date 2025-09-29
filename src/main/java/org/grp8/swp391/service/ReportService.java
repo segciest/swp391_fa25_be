@@ -67,6 +67,15 @@ public class ReportService {
         return reportRepo.save(check);
     }
 
+    public Report updateReportStatus(Long id, ReportedStatus status) {
+        Report check = reportRepo.findByReportId(id);
+        if (check == null) {
+            throw new EntityNotFoundException("Report not found with id " + id);
+        }
+        check.setStatus(status);
+        return reportRepo.save(check);
+    }
+
 
 
 
