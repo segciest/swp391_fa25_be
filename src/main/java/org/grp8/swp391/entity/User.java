@@ -26,25 +26,22 @@ public class User {
     @NotBlank
     @Column(name = "Name", nullable = false,columnDefinition = "NVARCHAR(100)")
     private String userName;
-    @NotBlank
 
     @Column(name = "Email", nullable = false,unique = true)
     @Email
     private String userEmail;
     @JsonIgnore
-    @NotBlank
 
-    @Column(name = "Password", nullable = false)
+    @Column(name = "Password", nullable = true)
     private String userPassword;
 
-    @Column(name = "DoB", nullable = false)
+    @Column(name = "DoB", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date dob;
     @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
+    @JoinColumn(name = "role_id", nullable = true)
     private Role role;
-    @NotBlank
-    @Column(name = "Phone", nullable = false, length = 10,unique = true)
+    @Column(name = "Phone", nullable = true, length = 10,unique = true)
     @Pattern( regexp = "^(0[3|5|7|8|9])[0-9]{8}$",message = "Invalid phone number")
     private String phone;
 
@@ -52,7 +49,7 @@ public class User {
     @JoinColumn(name = "Subscription_id")
     private Subscription subid;
 
-    @Column(name = "Status", nullable = false)
+    @Column(name = "Status", nullable = true)
     @Enumerated(EnumType.STRING)
 
     private UserStatus userStatus;
