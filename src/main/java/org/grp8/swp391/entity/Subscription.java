@@ -30,7 +30,7 @@ public class Subscription {
     @Column(name = "priority_level", nullable = false)
     private int priorityLevel;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     private String status;
 
 }

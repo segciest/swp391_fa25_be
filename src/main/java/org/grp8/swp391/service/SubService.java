@@ -41,11 +41,39 @@ public class SubService {
     }
 
     public Subscription create(Subscription subscription){
+
         return subRepo.save(subscription);
     }
 
-    public Subscription update(Subscription subscription){
-        return subRepo.save(subscription);
+    public Subscription update(Long subId,Subscription subscription){
+        Subscription sub = subRepo.findBySubId(subId);
+        if(sub==null){
+            throw new RuntimeException("Subscription not found with id: " + subId);
+        }
+        if(subscription.getSubName()!=null){
+            sub.setSubName(subscription.getSubName());
+        }
+        if(subscription.getSubDetails()!=null){
+            sub.setSubDetails(subscription.getSubDetails());
+        }
+        if(subscription.getSubPrice()!=null) {
+            sub.setSubPrice(subscription.getSubPrice());
+        }
+        if(subscription.getDuration() != 0 ){
+            sub.setDuration(subscription.getDuration());
+
+        }
+
+        if(subscription.getPriorityLevel() != 0){
+            sub.setPriorityLevel(subscription.getPriorityLevel());
+        }
+
+        if(subscription.getStatus()!=null){
+            sub.setStatus(subscription.getStatus());
+        }
+
+        return subRepo.save(sub);
+
     }
 
     public void deleteById(Long id){
