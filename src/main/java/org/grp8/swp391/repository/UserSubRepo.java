@@ -4,6 +4,7 @@ import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.User_Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,5 +15,8 @@ public interface UserSubRepo extends JpaRepository<User_Subscription, Long> {
     List<User_Subscription> findBySubscriptionId(Subscription subId);
     User_Subscription findByUserAndSubscriptionId(User user, Subscription subscription);
     List<User_Subscription> findByUser(User user);
+    @Query("SELECT us FROM User_Subscription us WHERE us.user = :user ORDER BY us.endDate DESC")
+    User_Subscription findTopByUserOrderByEndDateDesc(User user);
+
 
 }

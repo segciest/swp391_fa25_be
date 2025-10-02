@@ -1,5 +1,6 @@
 package org.grp8.swp391.controller;
 
+import org.grp8.swp391.dto.response.TransactionResponse;
 import org.grp8.swp391.entity.Payment;
 import org.grp8.swp391.entity.PaymentStatus;
 import org.grp8.swp391.entity.User_Subscription;
@@ -91,6 +92,15 @@ public class PaymentController {
         }
 
 
+    }
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getHistory(@PathVariable String id){
+        try{
+            List<TransactionResponse> pay = paymentService.getTransHistory(id);
+            return ResponseEntity.ok().body(pay);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 

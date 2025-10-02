@@ -8,6 +8,7 @@ import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -24,8 +25,17 @@ public class UserSubService {
     }
 
     public User_Subscription createUserSub(User_Subscription userSub) {
-        userSub.setStartDate(new Date());
+        Date startDate = new Date();
+        userSub.setStartDate(startDate);
+        int duration = userSub.getSubscriptionId().getDuration();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(startDate);
+        cal.add(Calendar.DAY_OF_MONTH, duration);
+        userSub.setEndDate(cal.getTime());
+        userSub.setStatus("ACTIVE");
+
         return userSubRepo.save(userSub);
+
     }
 
     public User_Subscription updateUserSub(Long id,User_Subscription userSub) {
@@ -52,5 +62,25 @@ public class UserSubService {
 
     public List<User_Subscription> findSubByUser(User user) {
         return userSubRepo.findByUser(user);
+    }
+
+
+    public int getRemainingDate(User user){
+        User_Subscription userSub = userSubRepo.findTopByUserOrderByEndDateDesc(user);
+
+        if(userSub == null){
+            throw new RuntimeException("User has no active subscription.");
+        }
+
+        Date date = new Date();
+        Date endDate = userSub.getEndDate();
+        if(endDate.before(date)){
+            return 0;
+        }
+
+        long diffInMillis = endDate.getTime() - date.getTime();
+        long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
+
+        return (int) diffInDays;
     }
 }

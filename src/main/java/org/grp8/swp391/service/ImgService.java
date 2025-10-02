@@ -6,13 +6,15 @@ import org.grp8.swp391.repository.ImgRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class ImgService {
     @Autowired
     private ImgRepo imgRepo;
 
-    public Image findById(long id) {
+    public Image findByImgId(long id) {
         return imgRepo.findByImageId(id);
 
     }
@@ -21,7 +23,7 @@ public class ImgService {
         return imgRepo.findByUrl(url);
     }
 
-    public Image findByListing(Listing listing) {
+    public List<Image> findByListing(Listing listing) {
         return imgRepo.findByListingId(listing);
     }
 

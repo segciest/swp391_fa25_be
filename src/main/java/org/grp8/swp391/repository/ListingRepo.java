@@ -27,4 +27,5 @@ public interface ListingRepo extends JpaRepository<Listing, String> {
 
     Page<Listing> findByYearBetween(int startYear, int endYear, Pageable pageable);
     Page<Listing> findByPriceBetween(Double min, Double max, Pageable pageable);
+    Long countByStatus(ListingStatus status);
 }
