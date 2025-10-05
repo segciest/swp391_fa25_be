@@ -55,6 +55,7 @@ public class SubService {
         }
         if(subscription.getSubDetails()!=null){
             sub.setSubDetails(subscription.getSubDetails());
+            //check user detail 
         }
         if(subscription.getSubPrice()!=null) {
             sub.setSubPrice(subscription.getSubPrice());

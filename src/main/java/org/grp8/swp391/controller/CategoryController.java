@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
-    @GetMapping("/{name}")
-    public ResponseEntity<?> findByCategoryName(@PathVariable String name) {
+    @GetMapping("/name")
+    public ResponseEntity<?> findByCategoryName(@RequestParam String name) {
         Category category = categoryService.findByCategoryName(name);
         if(category == null) {
             throw new EntityNotFoundException("Category not found");

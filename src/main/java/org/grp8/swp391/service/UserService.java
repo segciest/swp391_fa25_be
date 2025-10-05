@@ -64,6 +64,10 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        if(!user.getUserEmail().equalsIgnoreCase(email)){
+            throw new RuntimeException("Invalid email or password");
+        }
+
         if (user.getUserStatus() != UserStatus.ACTIVE) {
             throw new RuntimeException("Your account is being Banned or Pending. Please contact admin for more information.");
         }
