@@ -103,6 +103,16 @@ public class PaymentController {
         }
     }
 
+    @PutMapping("/update/status/{id}")
+    public ResponseEntity<?> updatePaymentStatus(@PathVariable Long id,@RequestBody PaymentStatus status){
+        try{
+            Payment pay = paymentService.updatePaymentStatus(id, status);
+            return ResponseEntity.ok().body(pay);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
 }
 

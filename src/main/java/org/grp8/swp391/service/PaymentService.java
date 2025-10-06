@@ -38,6 +38,16 @@ public class PaymentService {
     }
 
 
+    public Payment updatePaymentStatus(Long id ,PaymentStatus status) {
+        Payment pay = paymentRepo.findByPaymentId(id);
+        if(pay == null){
+            throw new RuntimeException("Payment not found");
+
+        }
+        return paymentRepo.save(pay);
+    }
+
+
 
 
 

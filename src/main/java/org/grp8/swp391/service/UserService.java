@@ -145,13 +145,11 @@ public class UserService {
         }
         user.setRole(defaultRole);
 
-        if (req.getSubId() != null) {
-            Subscription sub = subRepo.findById(req.getSubId())
-                    .orElseThrow(() -> new RuntimeException("Subscription not found"));
-            user.setSubid(sub);
-        }
 
-        // encode password
+        Subscription freeSub = subRepo.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Default FREE subscription (ID=1) not found"));
+        user.setSubid(freeSub);
+
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
 
         return userRepo.save(user);
