@@ -20,6 +20,6 @@ public interface ReviewRepo extends JpaRepository<Review,Integer> {
     List<Review> findByReviewedUser_UserID(String userId);
     @Query("SELECT AVG(r.rate) FROM Review r WHERE r.reviewedUser.userID = :userId")
     Double findAverageRatingByUser(String userId);
-
+    boolean existsByReviewerAndReviewedUser(User reviewer, User reviewedUser);
 
 }
