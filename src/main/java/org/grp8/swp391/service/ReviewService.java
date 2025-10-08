@@ -28,9 +28,6 @@ public class ReviewService {
         return reviewRepo.findAll();
     }
 
-    public List<Review> getReviewsByListing(Listing listing){
-        return reviewRepo.findByListing(listing);
-    }
 
     public List<Review> getReviewByReviewer(User user){
         return reviewRepo.findByReviewer(user);
@@ -89,9 +86,6 @@ public class ReviewService {
         return reviewRepo.save(check);
     }
 
-    public List<Review> findByListingId(String listingId) {
-        return reviewRepo.findByListing_ListingId(listingId);
-    }
 
     public List<Review> findByReviewerId(String userId) {
         return reviewRepo.findByReviewer_UserID(userId);
