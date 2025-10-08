@@ -72,7 +72,10 @@ public class ListController {
     }
     @PostMapping("/create")
     public ResponseEntity<?>  create(@RequestBody Listing listing, HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
+        String token = jwtUtils.extractToken(request);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
+        }
         String email = jwtUtils.getUsernameFromToken(token);
 
         User seller = userRepo.findByUserEmail(email);
