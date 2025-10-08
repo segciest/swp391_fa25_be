@@ -5,10 +5,11 @@ import org.grp8.swp391.entity.ListingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
+@Repository
 public interface ListingRepo extends JpaRepository<Listing, String> {
     Listing findByListingId(String listingId);
 
