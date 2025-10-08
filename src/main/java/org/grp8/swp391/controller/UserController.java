@@ -95,7 +95,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            User user = userService.login(request.getUserEmail(), request.getUserPassword());
+            User user = userService.login(request.getEmail(), request.getPassword());
             String token = jwtUtils.generateToken(user.getUserEmail(),user.getRole().getRoleName());
 
 
@@ -125,3 +125,5 @@ public class UserController {
     }
 
 }
+
+//TEST

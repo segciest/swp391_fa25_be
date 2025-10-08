@@ -51,14 +51,12 @@ public class SubController {
 
     @PutMapping("/updateSub/{id}")
     public ResponseEntity<?> updateSubscription(@PathVariable Long id ,@RequestBody Subscription subscription) {
-        try {
-            Subscription sub = subService.findById(id);
-            return ResponseEntity.ok(subService.update(subscription));
-        } catch (RuntimeException e) {
+        try{
+            Subscription sub = subService.update(id, subscription);
+            return ResponseEntity.ok().body(sub);
+        }catch (RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-
     }
 
     @PostMapping("/create")

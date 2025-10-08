@@ -1,5 +1,6 @@
 package org.grp8.swp391.service;
 
+import org.grp8.swp391.dto.response.TransactionResponse;
 import org.grp8.swp391.entity.Payment;
 import org.grp8.swp391.entity.PaymentStatus;
 import org.grp8.swp391.entity.User_Subscription;
@@ -7,6 +8,7 @@ import org.grp8.swp391.repository.PaymentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,6 +35,16 @@ public class PaymentService {
 
     public List<Payment> findByUSerSubscription(User_Subscription user_subscription) {
         return paymentRepo.findByUserSubscription(user_subscription);
+    }
+
+
+    public Payment updatePaymentStatus(Long id ,PaymentStatus status) {
+        Payment pay = paymentRepo.findByPaymentId(id);
+        if(pay == null){
+            throw new RuntimeException("Payment not found");
+
+        }
+        return paymentRepo.save(pay);
     }
 
 
@@ -75,6 +87,21 @@ public class PaymentService {
 
         return paymentRepo.save(pay);
 
+    }
+
+
+    public List<TransactionResponse> getTransHistory(String userId){
+        List<Payment> pay = paymentRepo.findByUserId(userId);
+        List<TransactionResponse> history = new ArrayList<>();
+        for(Payment p : pay){
+            User_Subscription userSub = p.getUserSubscription();
+            history.add(new TransactionResponse(
+                    userSub.getSubscriptionId().getSubName(),userSub.getStartDate(),userSub.getEndDate(),p.getAmount(), p.getMethod(),p.getTransactionCode(),
+                    p.getCreateDate(),
+                    p.getStatus().name() ));
+
+        }
+        return history;
     }
 
 

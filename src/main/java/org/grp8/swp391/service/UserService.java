@@ -64,6 +64,10 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        if(!user.getUserEmail().equalsIgnoreCase(email)){
+            throw new RuntimeException("Invalid email or password");
+        }
+
         if (user.getUserStatus() != UserStatus.ACTIVE) {
             throw new RuntimeException("Your account is being Banned or Pending. Please contact admin for more information.");
         }
@@ -111,6 +115,9 @@ public class UserService {
         }
 
         if (up.getPhone() != null) {
+            if (userRepo.findByPhone(up.getPhone()) != null) {
+                throw new RuntimeException("Phone already in use");
+            }
             check.setPhone(up.getPhone());
         }
 
@@ -125,6 +132,9 @@ public class UserService {
         User user = new User();
         user.setUserName(req.getUserName());
         user.setUserEmail(req.getUserEmail());
+        if (userRepo.findByPhone(req.getPhone()) != null) {
+            throw new RuntimeException("Phone already in use");
+        }
         user.setPhone(req.getPhone());
         user.setDob(req.getDob());
         user.setUserStatus(UserStatus.PENDING);
@@ -135,13 +145,11 @@ public class UserService {
         }
         user.setRole(defaultRole);
 
-        if (req.getSubId() != null) {
-            Subscription sub = subRepo.findById(req.getSubId())
-                    .orElseThrow(() -> new RuntimeException("Subscription not found"));
-            user.setSubid(sub);
-        }
 
-        // encode password
+        Subscription freeSub = subRepo.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Default FREE subscription (ID=1) not found"));
+        user.setSubid(freeSub);
+
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
 
         return userRepo.save(user);
@@ -155,3 +163,4 @@ public class UserService {
         return userRepo.findByUserID(id);
     }
 }
+

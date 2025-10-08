@@ -1,5 +1,6 @@
 package org.grp8.swp391.dto.request;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequest {
-    private String email;
-    private String password;
-
+public class CreateReviewRequest {
+    private String reviewerId;
+    private String sellerId;
+    private int rate;
+    private String comment;
 }
