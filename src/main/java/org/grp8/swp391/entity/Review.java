@@ -16,9 +16,7 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
-    @ManyToOne
-    @JoinColumn(name = "listing_id", nullable = true)
-    private Listing listing;
+
     @ManyToOne
     @JoinColumn(name = "reviewer", nullable = false)
     private User reviewer;

@@ -1,5 +1,7 @@
 package org.grp8.swp391.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.service.SubService;
@@ -17,6 +19,9 @@ public class SubController {
     private SubService subService;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
 
     @GetMapping("/{id}")
@@ -81,23 +86,28 @@ public class SubController {
 
 
 
-    @PostMapping("/Subscription")
-    public ResponseEntity<?> SubPackage(@RequestParam String userId,@RequestParam Long subId) {
-        try{
-            User u = userService.findUserById(userId);
-            if(u==null){
+    @PostMapping("/SubPackage")
+    public ResponseEntity<?> SubPackage(@RequestParam Long subId, HttpServletRequest request) {
+        try {
+
+            String token = jwtUtils.extractToken(request);
+            if (token == null) {
+                return ResponseEntity.status(401).body("Missing or invalid token");
+            }
+
+            String email = jwtUtils.getUsernameFromToken(token);
+
+            User user = userService.findByUserEmail(email);
+            if (user == null) {
                 return ResponseEntity.badRequest().body("User not found");
             }
-            Subscription sub = subService.findById(subId);
-            if(sub==null){
-                return ResponseEntity.badRequest().body("Subscription not found");
-            }
-            u.setSubid(sub);
-            User updateUser = userService.save(u);
-            return ResponseEntity.ok().body(updateUser);
 
-        }catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            User updatedUser = subService.subPackage(user.getUserID(), subId);
+
+            return ResponseEntity.ok(updatedUser);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
     @PutMapping("/cacleSub")

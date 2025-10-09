@@ -6,6 +6,7 @@ import org.grp8.swp391.entity.ListingStatus;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.User_Subscription;
 import org.grp8.swp391.repository.ListingRepo;
+import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,9 @@ import java.util.List;
 
 @Service
 public class ListingService {
+
+    @Autowired
+    private UserRepo userRepo;
 
     @Autowired
     private ListingRepo listingRepo;
@@ -51,7 +55,10 @@ public class ListingService {
     }
 
     public Listing create(Listing listing) {
-        User seller = listing.getSeller();
+        User seller = userRepo.findByUserID(listing.getSeller().getUserID());
+        if (seller == null) {
+            throw new RuntimeException("Seller not found.");
+        }
         User_Subscription userSub = userSubRepo.findTopByUserOrderByEndDateDesc(seller);
         if(userSub==null){
             throw new RuntimeException("You must subscribe to a package before posting listings.");

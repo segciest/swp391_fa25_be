@@ -1,11 +1,16 @@
 package org.grp8.swp391.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.ListingStatus;
+import org.grp8.swp391.entity.User;
+import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.service.ListingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +21,12 @@ import org.springframework.data.domain.Pageable;
 public class ListController {
     @Autowired
     private ListingService listingService;
+
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
 
     @GetMapping
@@ -60,8 +71,21 @@ public class ListController {
         return ResponseEntity.ok(listingService.updateById(id, listing));
     }
     @PostMapping("/create")
-    public ResponseEntity<?>  create(@RequestBody Listing listing) {
-        return ResponseEntity.ok(listingService.create(listing));
+    public ResponseEntity<?>  create(@RequestBody Listing listing, HttpServletRequest request) {
+        String token = jwtUtils.extractToken(request);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
+        }
+        String email = jwtUtils.getUsernameFromToken(token);
+
+        User seller = userRepo.findByUserEmail(email);
+        if (seller == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+
+        listing.setSeller(seller);
+        Listing saved = listingService.create(listing);
+        return ResponseEntity.ok(saved);
     }
     @GetMapping("/seller/{id}")
     public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {

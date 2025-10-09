@@ -87,33 +87,34 @@ public class SubService {
 
     public User subPackage(String userId,Long subId){
         User user = userRepo.findByUserID(userId);
-        if(user==null){
+        if (user == null) {
             throw new RuntimeException("User not found");
         }
 
         Subscription sub = subRepo.findBySubId(subId);
-        if(sub==null){
-            throw new RuntimeException("Sub not found");
+        if (sub == null) {
+            throw new RuntimeException("Subscription not found");
         }
 
         User_Subscription userSub = new User_Subscription();
         userSub.setUser(user);
         userSub.setSubscriptionId(sub);
+        userSub.setStatus("ACTIVE");
 
-        Date date = new Date();
-        userSub.setStartDate(date);
+        Date startDate = new Date();
+        userSub.setStartDate(startDate);
 
         Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
+        cal.setTime(startDate);
         cal.add(Calendar.DAY_OF_MONTH, sub.getDuration());
         userSub.setEndDate(cal.getTime());
 
-        userSub.setStatus("ACTIVE");
         userSubRepo.save(userSub);
 
-
         user.setSubid(sub);
-        return userRepo.save(user);
+        userRepo.save(user);
+
+        return user;
     }
 
     public User canclePackage(String userId,Long subId){
