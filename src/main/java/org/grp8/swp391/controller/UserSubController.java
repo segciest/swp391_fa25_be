@@ -17,8 +17,13 @@ public class UserSubController {
     @Autowired
     private UserSubService userSubService;
     @PostMapping("/create")
-    public ResponseEntity<?> createUserSub(@RequestBody User_Subscription userSub) {
-        return ResponseEntity.ok(userSubService.createUserSub(userSub));
+    public ResponseEntity<?> createUserSub(@RequestParam String userId, @RequestParam Long subId) {
+        try {
+            User_Subscription created = userSubService.createUserSub(userId, subId);
+            return ResponseEntity.ok(created);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUserSub(@PathVariable Long id) {

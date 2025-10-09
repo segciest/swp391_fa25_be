@@ -100,8 +100,10 @@ public class UserController {
 
 
             LoginResponse res = new LoginResponse();
+            res.setUserId(user.getUserID());
             res.setUserName(user.getUserName());
             res.setUserEmail(user.getUserEmail());
+            res.setPhone(user.getPhone());
             res.setUserStatus(user.getUserStatus().name());
 
             res.setDob(user.getDob());

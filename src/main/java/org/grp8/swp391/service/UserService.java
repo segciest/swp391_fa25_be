@@ -167,10 +167,16 @@ public class UserService {
         Date startDate = new Date();
         userSub.setStartDate(startDate);
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(startDate);
-        cal.add(Calendar.DAY_OF_MONTH, freeSub.getDuration());
-        userSub.setEndDate(cal.getTime());
+        if (freeSub.getDuration() > 0) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            cal.add(Calendar.DAY_OF_MONTH, freeSub.getDuration());
+            userSub.setEndDate(cal.getTime());
+        } else {
+
+            userSub.setEndDate(null);
+        }
+
 
         userSub.setStatus("ACTIVE");
 

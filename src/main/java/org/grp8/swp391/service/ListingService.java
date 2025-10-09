@@ -83,9 +83,17 @@ public class ListingService {
             }
         }
 
+
+
         listing.setCreatedAt(new Date());
         listing.setStatus(ListingStatus.PENDING);
         listing.setSeller(seller);
+
+        if (listing.getImages() != null && !listing.getImages().isEmpty()) {
+            for (Image img : listing.getImages()) {
+                img.setListingId(listing);
+            }
+        }
         return listingRepo.save(listing);
     }
 
