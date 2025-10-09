@@ -91,11 +91,14 @@ public class SubController {
         try {
 
             String token = jwtUtils.extractToken(request);
-            if (token == null) {
+            if (token == null || !jwtUtils.checkValidToken(token)) {
                 return ResponseEntity.status(401).body("Missing or invalid token");
             }
 
             String email = jwtUtils.getUsernameFromToken(token);
+            if (email == null) {
+                return ResponseEntity.status(401).body("Invalid token payload");
+            }
 
             User user = userService.findByUserEmail(email);
             if (user == null) {

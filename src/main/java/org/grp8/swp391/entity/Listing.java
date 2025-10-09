@@ -71,7 +71,8 @@ public class Listing {
 
     @Column(name = "Price",nullable = false)
     private Double price;
-    // contract field removed
+    @Column(name = "Contact",nullable = false)
+    private String contact;
     @Enumerated(EnumType.STRING)
     private ListingStatus status;
     @Column(name = "Create_At",nullable = false)

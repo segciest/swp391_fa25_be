@@ -76,16 +76,32 @@ public class ListController {
         if (token == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
         }
+        if (!jwtUtils.checkValidToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
         String email = jwtUtils.getUsernameFromToken(token);
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token payload");
+        }
 
         User seller = userRepo.findByUserEmail(email);
         if (seller == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
         }
-
-        listing.setSeller(seller);
-        Listing saved = listingService.create(listing);
-        return ResponseEntity.ok(saved);
+        try {
+            listing.setSeller(seller);
+            Listing saved = listingService.create(listing);
+            return ResponseEntity.ok(saved);
+        } catch (RuntimeException e) {
+            // known business errors (subscription, validation, etc.) -> 400 with message
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            // unexpected -> log stacktrace and return 500 with message to help debugging
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating listing: " + e.toString());
+        }
     }
     @GetMapping("/seller/{id}")
     public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
