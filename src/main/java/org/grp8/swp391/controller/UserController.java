@@ -100,14 +100,15 @@ public class UserController {
 
 
             LoginResponse res = new LoginResponse();
+            res.setUserId(user.getUserID());
             res.setUserName(user.getUserName());
             res.setUserEmail(user.getUserEmail());
-            res.setUserId(user.getUserID());
+            res.setPhone(user.getPhone());
             res.setUserStatus(user.getUserStatus().name());
 
             res.setDob(user.getDob());
             res.setRole(user.getRole());
-            res.setToken(token) ;
+            res.setToken(token);
             return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
