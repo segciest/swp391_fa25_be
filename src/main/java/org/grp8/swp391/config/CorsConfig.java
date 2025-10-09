@@ -1,6 +1,5 @@
 package org.grp8.swp391.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -14,10 +13,14 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("*")
+                        // ✅ Ghi rõ origin FE (Next.js)
+                        .allowedOrigins("http://localhost:3000")
+                        // ✅ Cho phép các method cần thiết
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                        // ✅ Cho phép mọi header
                         .allowedHeaders("*")
-                        .allowCredentials(false);
+                        // ✅ Cho phép gửi token, cookies, v.v.
+                        .allowCredentials(true);
             }
         };
     }

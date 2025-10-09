@@ -13,6 +13,7 @@ import java.util.Date;
 public class LoginResponse {
     private String userName;
     private String userEmail;
+    private String userId;
     private Date dob;
     private Role role;
     private String userStatus;

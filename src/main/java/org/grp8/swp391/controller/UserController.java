@@ -102,11 +102,12 @@ public class UserController {
             LoginResponse res = new LoginResponse();
             res.setUserName(user.getUserName());
             res.setUserEmail(user.getUserEmail());
+            res.setUserId(user.getUserID());
             res.setUserStatus(user.getUserStatus().name());
 
             res.setDob(user.getDob());
             res.setRole(user.getRole());
-            res.setToken(token);
+            res.setToken(token) ;
             return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

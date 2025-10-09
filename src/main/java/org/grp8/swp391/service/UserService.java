@@ -9,6 +9,8 @@ import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.repository.RoleRepo;
 import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
+import org.grp8.swp391.repository.UserSubRepo;
+import org.grp8.swp391.entity.User_Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,9 @@ public class UserService {
 
     @Autowired
     private SubRepo subRepo;
+
+    @Autowired
+    private UserSubRepo userSubRepo;
 
 
     @Autowired
@@ -152,7 +157,33 @@ public class UserService {
 
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
 
-        return userRepo.save(user);
+        // First save the user so it has an ID for the User_Subscription foreign key
+        User saved = userRepo.save(user);
+
+        // Create and persist a User_Subscription record referencing the saved user
+        try {
+            User_Subscription us = new User_Subscription();
+            us.setUser(saved);
+            us.setSubscriptionId(freeSub);
+            us.setStartDate(new java.util.Date());
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(us.getStartDate());
+            cal.add(java.util.Calendar.DAY_OF_MONTH, freeSub.getDuration());
+            us.setEndDate(cal.getTime());
+            us.setDuration(freeSub.getDuration());
+            us.setStatus("ACTIVE");
+
+            userSubRepo.save(us);
+
+            // update user's subid to reference the saved subscription
+            saved.setSubid(freeSub);
+            saved = userRepo.save(saved);
+        } catch (Exception ex) {
+            // Log a warning; don't block registration
+            System.err.println("Warning: failed to create user subscription: " + ex.getMessage());
+        }
+
+        return saved;
     }
 
     public List<User> getAllUsers(){
