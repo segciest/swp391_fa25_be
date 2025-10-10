@@ -30,7 +30,7 @@ public class ListController {
 
 
     @GetMapping
-    public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Listing> listings = listingService.findAll(pageable);
         return ResponseEntity.ok(listings);
