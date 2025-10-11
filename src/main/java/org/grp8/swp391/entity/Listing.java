@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -20,6 +22,10 @@ public class Listing {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @OneToMany(mappedBy = "listingId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
+
     @Column(name = "Title", nullable = false)
     private String title;
     @Column(name = "Description", nullable = false)
@@ -65,9 +71,8 @@ public class Listing {
 
     @Column(name = "Price",nullable = false)
     private Double price;
-    @Column(name = "Contract",nullable = false)
-
-    private String contract;
+    @Column(name = "Contact",nullable = false)
+    private String contact;
     @Enumerated(EnumType.STRING)
     private ListingStatus status;
     @Column(name = "Create_At",nullable = false)

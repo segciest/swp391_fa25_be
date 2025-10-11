@@ -11,8 +11,11 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponse {
+    private String userId;
+
     private String userName;
     private String userEmail;
+    private String phone;
     private Date dob;
     private Role role;
     private String userStatus;

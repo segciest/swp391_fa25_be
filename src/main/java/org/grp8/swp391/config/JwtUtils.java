@@ -3,7 +3,6 @@ package org.grp8.swp391.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,37 +20,54 @@ public class JwtUtils {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jp.getExpiration());
 
-        return Jwts.builder()
-                .setSubject(username)
-                .claim("role", role)
-                .setIssuedAt(now)
-                .setExpiration(expiration)
-                .signWith(SignatureAlgorithm.HS256, jp.getSecret().getBytes())
-                .compact();
+    return Jwts.builder()
+        .setSubject(username)
+        .claim("role", role)
+        .setIssuedAt(now)
+        .setExpiration(expiration)
+        .signWith(Keys.hmacShaKeyFor(jp.getSecret().getBytes()))
+        .compact();
     }
 
     public String getUsernameFromToken(String token) {
-        return parseClaims(token).getSubject();
+        try {
+            Claims c = parseClaims(token);
+            return c == null ? null : c.getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public String getRoleFromToken(String token) {
-        return (String) parseClaims(token).get("role");
+        try {
+            Claims c = parseClaims(token);
+            return c == null ? null : (String) c.get("role");
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public boolean checkValidToken(String token) {
         try {
-            parseClaims(token);
-            return true;
+            return parseClaims(token) != null;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
     private Claims parseClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(jp.getSecret().getBytes()).build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            // allow a small clock skew (seconds) to account for minor clock differences
+            return Jwts.parserBuilder()
+                    .setSigningKey(jp.getSecret().getBytes())
+                    .setAllowedClockSkewSeconds(60)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // token expired - return null and let callers decide
+            return null;
+        }
     }
 
     public String extractToken(HttpServletRequest request) {

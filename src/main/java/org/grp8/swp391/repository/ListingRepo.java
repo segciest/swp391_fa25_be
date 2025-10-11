@@ -5,6 +5,8 @@ import org.grp8.swp391.entity.ListingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,6 +14,9 @@ import java.util.List;
 @Repository
 public interface ListingRepo extends JpaRepository<Listing, String> {
     Listing findByListingId(String listingId);
+
+    @Query("SELECT COUNT(l) FROM Listing l WHERE l.seller.userID = :userID")
+    long countListingsByUser(@Param("userID") String userID);
 
     Page<Listing> findBySeller_UserID(String sellerId, Pageable pageable);
     List<Listing> findBySeller_UserID(String sellerId);

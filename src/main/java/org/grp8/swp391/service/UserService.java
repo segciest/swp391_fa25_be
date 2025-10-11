@@ -2,17 +2,17 @@ package org.grp8.swp391.service;
 
 import org.grp8.swp391.dto.request.RegisterRequest;
 import org.grp8.swp391.dto.request.UpdateUserRequest;
-import org.grp8.swp391.entity.Role;
-import org.grp8.swp391.entity.Subscription;
-import org.grp8.swp391.entity.User;
-import org.grp8.swp391.entity.UserStatus;
+import org.grp8.swp391.entity.*;
 import org.grp8.swp391.repository.RoleRepo;
 import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
+import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -23,6 +23,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserSubRepo userSubRepo;
 
     @Autowired
     private SubRepo subRepo;
@@ -129,15 +132,18 @@ public class UserService {
             throw new RuntimeException("User already exists");
         }
 
-        User user = new User();
-        user.setUserName(req.getUserName());
-        user.setUserEmail(req.getUserEmail());
         if (userRepo.findByPhone(req.getPhone()) != null) {
             throw new RuntimeException("Phone already in use");
         }
+
+
+        User user = new User();
+        user.setUserName(req.getUserName());
+        user.setUserEmail(req.getUserEmail());
         user.setPhone(req.getPhone());
         user.setDob(req.getDob());
         user.setUserStatus(UserStatus.PENDING);
+
 
         Role defaultRole = roleRepo.findByRoleName("USER");
         if (defaultRole == null) {
@@ -150,9 +156,33 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Default FREE subscription (ID=1) not found"));
         user.setSubid(freeSub);
 
-        user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
 
-        return userRepo.save(user);
+        user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
+        User savedUser = userRepo.save(user);
+
+        User_Subscription userSub = new User_Subscription();
+        userSub.setUser(savedUser);
+        userSub.setSubscriptionId(freeSub);
+
+        Date startDate = new Date();
+        userSub.setStartDate(startDate);
+
+        if (freeSub.getDuration() > 0) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            cal.add(Calendar.DAY_OF_MONTH, freeSub.getDuration());
+            userSub.setEndDate(cal.getTime());
+        } else {
+
+            userSub.setEndDate(null);
+        }
+
+
+        userSub.setStatus("ACTIVE");
+
+        userSubRepo.save(userSub);
+
+        return savedUser;
     }
 
     public List<User> getAllUsers(){

@@ -1,10 +1,7 @@
 package org.grp8.swp391.service;
 
 
-import org.grp8.swp391.entity.Listing;
-import org.grp8.swp391.entity.ListingStatus;
-import org.grp8.swp391.entity.User;
-import org.grp8.swp391.entity.User_Subscription;
+import org.grp8.swp391.entity.*;
 import org.grp8.swp391.repository.ListingRepo;
 import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.repository.UserSubRepo;
@@ -55,22 +52,48 @@ public class ListingService {
     }
 
     public Listing create(Listing listing) {
+
         User seller = userRepo.findByUserID(listing.getSeller().getUserID());
         if (seller == null) {
             throw new RuntimeException("Seller not found.");
         }
+
         User_Subscription userSub = userSubRepo.findTopByUserOrderByEndDateDesc(seller);
-        if(userSub==null){
+        if (userSub == null) {
             throw new RuntimeException("You must subscribe to a package before posting listings.");
         }
 
-        Date date = new Date();
-        if(userSub.getEndDate().before(date)){
+
+        Date now = new Date();
+        if (userSub.getEndDate() != null && userSub.getEndDate().before(now)) {
             throw new RuntimeException("Your subscription has expired. Please renew to continue posting.");
         }
 
+
+        Subscription sub = userSub.getSubscriptionId();
+        if (sub == null) {
+            throw new RuntimeException("Subscription information not found for this user.");
+        }
+
+
+        if (sub.getSubName().equalsIgnoreCase("Free")) {
+            long postCount = listingRepo.countListingsByUser(seller.getUserID());
+            if (postCount >= 1) {
+                throw new RuntimeException("Free plan users can only post 1 listing. Please upgrade your plan.");
+            }
+        }
+
+
+
         listing.setCreatedAt(new Date());
         listing.setStatus(ListingStatus.PENDING);
+        listing.setSeller(seller);
+
+        if (listing.getImages() != null && !listing.getImages().isEmpty()) {
+            for (Image img : listing.getImages()) {
+                img.setListingId(listing);
+            }
+        }
         return listingRepo.save(listing);
     }
 
@@ -123,9 +146,7 @@ public class ListingService {
         if (lis.getPrice() != null) {
             up.setPrice(lis.getPrice());
         }
-        if (lis.getContract() != null) {
-            up.setContract(lis.getContract());
-        }
+        // contract field removed - no longer handled
         if (lis.getStatus() != null) {
             up.setStatus(lis.getStatus());
         }
@@ -174,6 +195,13 @@ public class ListingService {
     public Page<Listing> findByYearRange(Integer start, Integer end, Pageable pageable) {
         return listingRepo.findByYearBetween(start, end, pageable);
     }
+
+    public Page<Listing> findAllActive(Pageable pageable) {
+        return listingRepo.findByStatus(ListingStatus.ACTIVE, pageable);
+    }
+
+
+
 
 
 }

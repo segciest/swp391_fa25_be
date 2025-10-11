@@ -4,6 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.User_Subscription;
+import org.grp8.swp391.repository.SubRepo;
+import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,12 @@ public class UserSubService {
     @Autowired
     private UserSubRepo userSubRepo;
 
+    @Autowired
+    private UserRepo userRepo;
+
+    @Autowired
+    private SubRepo subRepo;
+
     public void deleteById(Long id) {
         if(!userSubRepo.existsById(id)){
             throw new EntityNotFoundException("UserSub with id " + id + " does not exist");
@@ -24,14 +32,33 @@ public class UserSubService {
         userSubRepo.deleteById(id);
     }
 
-    public User_Subscription createUserSub(User_Subscription userSub) {
+    public User_Subscription createUserSub(String userId, Long subId) {
+        User user = userRepo.findByUserID(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        Subscription sub = subRepo.findById(subId)
+                .orElseThrow(() -> new RuntimeException("Subscription not found"));
+
+        User_Subscription userSub = new User_Subscription();
+        userSub.setUser(user);
+        userSub.setSubscriptionId(sub);
+
         Date startDate = new Date();
         userSub.setStartDate(startDate);
-        int duration = userSub.getSubscriptionId().getDuration();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(startDate);
-        cal.add(Calendar.DAY_OF_MONTH, duration);
-        userSub.setEndDate(cal.getTime());
+
+
+        int duration = sub.getDuration();
+        if (duration > 0) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            cal.add(Calendar.DAY_OF_MONTH, duration);
+            userSub.setEndDate(cal.getTime());
+        } else {
+            userSub.setEndDate(null);
+        }
+
         userSub.setStatus("ACTIVE");
 
         return userSubRepo.save(userSub);
