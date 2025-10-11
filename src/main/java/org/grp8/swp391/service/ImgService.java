@@ -27,4 +27,12 @@ public class ImgService {
         return imgRepo.findByListingId(listing);
     }
 
+    public Image save(Image image) {
+        return imgRepo.save(image);
+    }
+
+    public List<Image> getByListing(Listing listing) {
+        return imgRepo.findByListingId(listing);
+    }
+
 }
