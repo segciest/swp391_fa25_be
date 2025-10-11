@@ -89,18 +89,6 @@ public class ListingService {
         listing.setStatus(ListingStatus.PENDING);
         listing.setSeller(seller);
 
-        // Ensure contact (seller phone) is set to satisfy DB NOT NULL constraint.
-        // If frontend didn't provide contact, use seller's phone from user profile.
-        if (listing.getContact() == null || listing.getContact().isBlank()) {
-            String sellerPhone = seller.getPhone();
-            if (sellerPhone != null && !sellerPhone.isBlank()) {
-                listing.setContact(sellerPhone);
-            } else {
-                // fallback to empty string to avoid NULL DB insert
-                listing.setContact("");
-            }
-        }
-
         if (listing.getImages() != null && !listing.getImages().isEmpty()) {
             for (Image img : listing.getImages()) {
                 img.setListingId(listing);
@@ -207,6 +195,13 @@ public class ListingService {
     public Page<Listing> findByYearRange(Integer start, Integer end, Pageable pageable) {
         return listingRepo.findByYearBetween(start, end, pageable);
     }
+
+    public Page<Listing> findAllActive(Pageable pageable) {
+        return listingRepo.findByStatus(ListingStatus.ACTIVE, pageable);
+    }
+
+
+
 
 
 }

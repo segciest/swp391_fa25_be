@@ -30,7 +30,7 @@ public class ListController {
 
 
     @GetMapping
-    public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Listing> listings = listingService.findAll(pageable);
         return ResponseEntity.ok(listings);
@@ -54,6 +54,25 @@ public class ListController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid status value: " + status);
         } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/approve/{id}")
+    public ResponseEntity<?> approveListing(@PathVariable String id) {
+        try {
+            Listing approveLis = listingService.updateListingStatus(id, ListingStatus.ACTIVE);
+            return ResponseEntity.ok("Listing approved successfully with id: " + id);
+        }catch(RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reject/{id}")
+    public ResponseEntity<?> rejectListing(@PathVariable String id) {
+        try {
+            Listing approveLis = listingService.updateListingStatus(id, ListingStatus.REJECTED);
+            return ResponseEntity.ok("Listing rejected successfully with id: " + id);
+        }catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -104,7 +123,7 @@ public class ListController {
         }
     }
     @GetMapping("/seller/{id}")
-    public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Listing> listings = listingService.findBySellerId(id, pageable);
         return ResponseEntity.ok(listings);
@@ -121,7 +140,7 @@ public class ListController {
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<?> getByCategory(@PathVariable Long categoryId,
                                            @RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "10") int size) {
+                                           @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(listingService.findByCategoryId(categoryId, pageable));
     }
@@ -130,7 +149,7 @@ public class ListController {
     @GetMapping("/search/model")
     public ResponseEntity<?> searchByModel(@RequestParam String model,
                                            @RequestParam(defaultValue = "0") int page,
-                                           @RequestParam(defaultValue = "10") int size) {
+                                           @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(listingService.findByModel(model, pageable));
     }
