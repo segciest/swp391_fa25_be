@@ -58,7 +58,7 @@ public class JwtUtils {
     private Claims parseClaims(String token) {
         try {
             // allow a small clock skew (seconds) to account for minor clock differences
-            return Jwts.parserBuilder()
+            return Jwts.parser()
                     .setSigningKey(jp.getSecret().getBytes())
                     .setAllowedClockSkewSeconds(60)
                     .build()
