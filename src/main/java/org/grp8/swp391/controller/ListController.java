@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Pageable;
@@ -44,7 +45,7 @@ public class ListController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateListingStatus(@PathVariable String id, @RequestParam String status) {
         try {
@@ -57,6 +58,7 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveListing(@PathVariable String id) {
         try {
@@ -66,7 +68,7 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectListing(@PathVariable String id) {
         try {
@@ -76,7 +78,6 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 
 
     @DeleteMapping("/delete/{id}")
@@ -128,6 +129,7 @@ public class ListController {
         Page<Listing> listings = listingService.findBySellerId(id, pageable);
         return ResponseEntity.ok(listings);
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getByStatus(@PathVariable ListingStatus status,
                                          @RequestParam(defaultValue = "0") int page,

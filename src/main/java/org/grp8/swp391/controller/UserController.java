@@ -13,6 +13,7 @@ import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,6 +45,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
 
     @GetMapping("/list")
     public List<User> getAllUser() {
@@ -55,6 +57,7 @@ public class UserController {
         User user = userService.findUserById(id);
         return ResponseEntity.ok(user);
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateUserStatus(@PathVariable String id, @RequestParam String status){
         try {
@@ -84,6 +87,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String id){
         User u = userService.findUserById(id);
@@ -115,7 +119,7 @@ public class UserController {
         }
     }
 
-
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/role/{id}")
     public ResponseEntity<?> updateRole(@PathVariable String id,@RequestParam Long roleId){
         try{
@@ -125,7 +129,32 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/active/{id}")
+
+    public ResponseEntity<?> updateUserStatusActive(@PathVariable String id){
+        try{
+            User u = userService.updateUSerStatus(id,UserStatus.ACTIVE);
+            return ResponseEntity.ok(u);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+
+    }
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/ban/{id}")
+    public ResponseEntity<?> updateUserStatusBanned(@PathVariable String id){
+        try{
+            User u = userService.updateUSerStatus(id,UserStatus.BANNED);
+            return ResponseEntity.ok(u);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+
+    }
 
 }
 
-//TEST
+
