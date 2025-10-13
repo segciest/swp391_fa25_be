@@ -58,7 +58,7 @@ public class ListingService {
             throw new RuntimeException("Seller not found.");
         }
 
-        User_Subscription userSub = userSubRepo.findTopByUserOrderByEndDateDesc(seller);
+        User_Subscription userSub = userSubRepo.findFirstByUserOrderByEndDateDesc(seller);
         if (userSub == null) {
             throw new RuntimeException("You must subscribe to a package before posting listings.");
         }

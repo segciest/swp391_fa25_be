@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/images")
@@ -47,6 +48,29 @@ public class ImgController {
         return ResponseEntity.ok(image);
     }
 
+    @PostMapping("/upload-temp")
+    public ResponseEntity<?> uploadTemp(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = cloudinaryService.uploadFile(file);
+            return ResponseEntity.ok(Map.of("url", imageUrl));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/upload-temp-multiple")
+    public ResponseEntity<?> uploadTempMultiple(@RequestParam("files") MultipartFile[] files) {
+        try {
+            List<String> urls = new ArrayList<>();
+            for (MultipartFile file : files) {
+                String url = cloudinaryService.uploadFile(file);
+                urls.add(url);
+            }
+            return ResponseEntity.ok(Map.of("urls", urls));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Upload failed: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/upload-multiple/{listingId}")
     public ResponseEntity<?> uploadMultipleImages(
