@@ -1,7 +1,9 @@
 package org.grp8.swp391.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.grp8.swp391.config.JwtUtils;
+import org.grp8.swp391.entity.Image;
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.ListingStatus;
 import org.grp8.swp391.entity.User;
@@ -15,7 +17,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.grp8.swp391.service.CloudinaryService;
+
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/listing")
@@ -28,6 +37,9 @@ public class ListController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
 
     @GetMapping
@@ -90,38 +102,45 @@ public class ListController {
     public ResponseEntity<?> updateListing(@PathVariable String id, @RequestBody Listing listing) {
         return ResponseEntity.ok(listingService.updateById(id, listing));
     }
-    @PostMapping("/create")
-    public ResponseEntity<?>  create(@RequestBody Listing listing, HttpServletRequest request) {
+    @PostMapping(value = "/create", consumes = "multipart/form-data")
+    public ResponseEntity<?> create(
+            @RequestPart("listing") String listingJson,
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
+            HttpServletRequest request) {
+
         String token = jwtUtils.extractToken(request);
-        if (token == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing token");
+        if (token == null || !jwtUtils.checkValidToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
         }
-        if (!jwtUtils.checkValidToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+
+        Listing listing;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            listing = mapper.readValue(listingJson, Listing.class);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid listing JSON");
         }
 
         String email = jwtUtils.getUsernameFromToken(token);
-        if (email == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token payload");
+        User seller = userRepo.findByUserEmail(email);
+        listing.setSeller(seller);
+        listing.setCreatedAt(new Date());
+        listing.setStatus(ListingStatus.PENDING);
+
+        if (files != null && files.length > 0) {
+            List<Image> imgs = new ArrayList<>();
+            for (MultipartFile file : files) {
+                String url = cloudinaryService.uploadFile(file);
+                Image img = new Image();
+                img.setUrl(url);
+                img.setListingId(listing);
+                imgs.add(img);
+            }
+            listing.setImages(imgs);
         }
 
-        User seller = userRepo.findByUserEmail(email);
-        if (seller == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
-        }
-        try {
-            listing.setSeller(seller);
-            Listing saved = listingService.create(listing);
-            return ResponseEntity.ok(saved);
-        } catch (RuntimeException e) {
-            // known business errors (subscription, validation, etc.) -> 400 with message
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            // unexpected -> log stacktrace and return 500 with message to help debugging
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating listing: " + e.toString());
-        }
+        Listing saved = listingService.create(listing);
+        return ResponseEntity.ok(saved);
     }
     @GetMapping("/seller/{id}")
     public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
