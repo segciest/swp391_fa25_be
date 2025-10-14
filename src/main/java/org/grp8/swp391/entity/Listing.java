@@ -26,9 +26,9 @@ public class Listing {
     @OneToMany(mappedBy = "listingId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
 
-    @Column(name = "Title", nullable = false)
+    @Column(name = "Title", nullable = false,columnDefinition = "NVARCHAR(255)")
     private String title;
-    @Column(name = "Description", nullable = false)
+    @Column(name = "Description", nullable = false,columnDefinition = "NVARCHAR(255)")
     private String description;
     @Column(name = "Brand", nullable = true)
     private String brand;
@@ -44,10 +44,10 @@ public class Listing {
     @Column(name = "Seat", nullable = true)
 
     private Integer seats;
-    @Column(name = "Vehicle_type", nullable = true)
+    @Column(name = "Vehicle_type", nullable = true,columnDefinition = "NVARCHAR(255)")
 
     private String vehicleType;
-    @Column(name = "Color", nullable = true)
+    @Column(name = "Color", nullable = true,columnDefinition = "NVARCHAR(255)")
 
     private String color;
     @Column(name = "Mileage", nullable = true)

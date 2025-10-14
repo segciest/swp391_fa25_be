@@ -53,6 +53,10 @@ public class User {
     @Enumerated(EnumType.STRING)
 
     private UserStatus userStatus;
+    @Column(name = "Address", nullable = true,columnDefinition = "NVARCHAR(255)")
+    private String address;
+    @Column(name = "City", nullable = true,columnDefinition = "NVARCHAR(255)")
+    private String city;
 
     @Column(name = "Avatar_Url")
     private String avatarUrl;

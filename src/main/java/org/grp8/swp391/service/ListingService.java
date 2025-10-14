@@ -226,6 +226,10 @@ public class ListingService {
         return listingRepo.findByStatus(ListingStatus.ACTIVE, pageable);
     }
 
+    public Page<Listing> findAllPending(Pageable pageable) {
+        return listingRepo.findByStatus(ListingStatus.PENDING, pageable);
+    }
+
 
     public ListingResponse toListingResponse(Listing listing) {
         List<String> urls = listing.getImages() != null
@@ -245,6 +249,7 @@ public class ListingService {
             return null;
         }
 
+
         List<String> imageUrls = new ArrayList<>();
         if (listing.getImages() != null && !listing.getImages().isEmpty()) {
             imageUrls = listing.getImages().stream()
@@ -252,21 +257,52 @@ public class ListingService {
                     .toList();
         }
 
+
+        String sellerName = null;
+        String sellerEmail = null;
+        String sellerPhone = null;
+        String sellerAvatar = null;
+
+        if (listing.getSeller() != null) {
+            sellerName = listing.getSeller().getUserName();
+            sellerEmail = listing.getSeller().getUserEmail();
+            sellerPhone = listing.getSeller().getPhone();
+            sellerAvatar = listing.getSeller().getAvatarUrl();
+        }
+
         return new ListingDetailResponse(
                 listing.getListingId(),
                 listing.getTitle(),
                 listing.getDescription(),
+
                 listing.getBrand(),
                 listing.getModel(),
                 listing.getColor(),
                 listing.getYear(),
+                listing.getSeats(),
+                listing.getVehicleType(),
+
+                listing.getMileage(),
+                listing.getBatteryCapacity(),
+                listing.getWarrantyInfo(),
+
                 listing.getPrice(),
                 listing.getContact(),
+
                 listing.getCategory() != null ? listing.getCategory().getCategoryName() : null,
-                listing.getSeller() != null ? listing.getSeller().getUserName() : null,
+                sellerName,
+                sellerEmail,
+                sellerPhone,
+                sellerAvatar,
+
+                listing.getStatus() != null ? listing.getStatus().name() : null,
+                listing.getCreatedAt() != null ? listing.getCreatedAt().toString() : null,
+                listing.getUpdatedAt() != null ? listing.getUpdatedAt().toString() : null,
+
                 imageUrls
         );
     }
+
 
 
 

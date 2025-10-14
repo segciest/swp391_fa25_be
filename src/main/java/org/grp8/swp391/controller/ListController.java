@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/listing")
@@ -48,6 +49,26 @@ public class ListController {
     public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Listing> listings = listingService.findAll(pageable);
+        List<ListingDetailResponse> lis = listings.getContent()
+                .stream()
+                .map(listingService::toListingDetailResponse)
+                .toList();
+        return ResponseEntity.ok(lis);
+    }
+    @GetMapping("/active")
+    public ResponseEntity<?> getAllActiveListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Listing> listings = listingService.findAllActive(pageable);
+        List<ListingDetailResponse> lis = listings.getContent()
+                .stream()
+                .map(listingService::toListingDetailResponse)
+                .toList();
+        return ResponseEntity.ok(lis);
+    }
+    @GetMapping("/pending")
+    public ResponseEntity<?> getAllPendingListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Listing> listings = listingService.findAllPending(pageable);
         List<ListingDetailResponse> lis = listings.getContent()
                 .stream()
                 .map(listingService::toListingDetailResponse)
@@ -76,7 +97,6 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveListing(@PathVariable String id) {
         try {
@@ -133,7 +153,10 @@ public class ListController {
 
         Listing saved = listingService.createListing(listing, files);
 
-        return ResponseEntity.ok(listingService.toListingResponse(saved));
+        return ResponseEntity.ok(Map.of(
+                "message", "Đăng bài thành công!",
+                "data", listingService.toListingResponse(saved)
+        ));
     }
     @GetMapping("/seller/{id}")
     public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
