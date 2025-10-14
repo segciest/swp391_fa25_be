@@ -1,5 +1,6 @@
 package org.grp8.swp391.service;
 
+import com.cloudinary.Cloudinary;
 import org.grp8.swp391.dto.request.RegisterRequest;
 import org.grp8.swp391.dto.request.UpdateUserRequest;
 import org.grp8.swp391.entity.*;
@@ -10,6 +11,7 @@ import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -33,6 +35,9 @@ public class UserService {
 
     @Autowired
     private RoleRepo roleRepo;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     public User updateUserRole(String id, Long roleId){
         User u = userRepo.findByUserID(id);
@@ -191,6 +196,18 @@ public class UserService {
 
     public User findUserById(String id){
         return userRepo.findByUserID(id);
+    }
+
+
+    public User updateUserAvatar(String userId, MultipartFile file){
+        User u = userRepo.findByUserID(userId);
+        if (u == null) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
+
+        String url = cloudinaryService.uploadFile(file);
+        u.setAvatarUrl(url);
+        return userRepo.save(u);
     }
 }
 

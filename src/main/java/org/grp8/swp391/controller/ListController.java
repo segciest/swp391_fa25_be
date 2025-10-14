@@ -3,6 +3,8 @@ package org.grp8.swp391.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.grp8.swp391.config.JwtUtils;
+import org.grp8.swp391.dto.response.ListingDetailResponse;
+import org.grp8.swp391.dto.response.ListingResponse;
 import org.grp8.swp391.entity.Image;
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.ListingStatus;
@@ -46,13 +48,17 @@ public class ListController {
     public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Listing> listings = listingService.findAll(pageable);
-        return ResponseEntity.ok(listings);
+        List<ListingDetailResponse> lis = listings.getContent()
+                .stream()
+                .map(listingService::toListingDetailResponse)
+                .toList();
+        return ResponseEntity.ok(lis);
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getListingById(@PathVariable String id) {
         try {
             Listing lis = listingService.findById(id);
-            return ResponseEntity.ok(lis);
+            return ResponseEntity.ok(listingService.toListingDetailResponse(lis));
         }catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
@@ -124,29 +130,20 @@ public class ListController {
         String email = jwtUtils.getUsernameFromToken(token);
         User seller = userRepo.findByUserEmail(email);
         listing.setSeller(seller);
-        listing.setCreatedAt(new Date());
-        listing.setStatus(ListingStatus.PENDING);
 
-        if (files != null && files.length > 0) {
-            List<Image> imgs = new ArrayList<>();
-            for (MultipartFile file : files) {
-                String url = cloudinaryService.uploadFile(file);
-                Image img = new Image();
-                img.setUrl(url);
-                img.setListingId(listing);
-                imgs.add(img);
-            }
-            listing.setImages(imgs);
-        }
+        Listing saved = listingService.createListing(listing, files);
 
-        Listing saved = listingService.create(listing);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(listingService.toListingResponse(saved));
     }
     @GetMapping("/seller/{id}")
     public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Listing> listings = listingService.findBySellerId(id, pageable);
-        return ResponseEntity.ok(listings);
+        List<ListingResponse> response = listings.getContent()
+                .stream()
+                .map(listingService::toListingResponse)
+                .toList();
+        return ResponseEntity.ok(response);
     }
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/status/{status}")

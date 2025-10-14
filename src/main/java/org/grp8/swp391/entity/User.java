@@ -53,4 +53,7 @@ public class User {
     @Enumerated(EnumType.STRING)
 
     private UserStatus userStatus;
+
+    @Column(name = "Avatar_Url")
+    private String avatarUrl;
 }
