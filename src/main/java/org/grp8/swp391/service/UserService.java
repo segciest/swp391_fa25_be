@@ -24,6 +24,9 @@ public class UserService {
     private UserRepo userRepo;
 
     @Autowired
+    private EmailVerifyService emailVerifyService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -183,8 +186,6 @@ public class UserService {
         }
 
 
-        userSub.setStatus("ACTIVE");
-
         userSubRepo.save(userSub);
 
         return savedUser;
@@ -208,6 +209,27 @@ public class UserService {
         String url = cloudinaryService.uploadFile(file);
         u.setAvatarUrl(url);
         return userRepo.save(u);
+    }
+
+
+    public Boolean verifyOtpCode(String email, String otp){
+        User u = userRepo.findByUserEmail(email);
+        if (u == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        if(u.getVerifiedCode() == null){
+            throw new RuntimeException("Verification code not found");
+        }
+
+        if(!u.getVerifiedCode().equals(otp)){
+            throw new RuntimeException("Verification code does not match");
+        }
+        u.setVerified(true);
+        u.setVerifiedCode(null);
+        userRepo.save(u);
+        return true;
+
     }
 }
 

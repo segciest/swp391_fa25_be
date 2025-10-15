@@ -48,7 +48,6 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
 
     @GetMapping("/list")
     public List<User> getAllUser() {
@@ -60,7 +59,7 @@ public class UserController {
         User user = userService.findUserById(id);
         return ResponseEntity.ok(user);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateUserStatus(@PathVariable String id, @RequestParam String status){
         try {
@@ -90,7 +89,6 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String id){
         User u = userService.findUserById(id);
@@ -122,7 +120,6 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/role/{id}")
     public ResponseEntity<?> updateRole(@PathVariable String id,@RequestParam Long roleId){
         try{
@@ -132,7 +129,17 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
+    //chua can dung den
+    @PostMapping("/verify")
+    public ResponseEntity<?> verify(@RequestParam String email, @RequestParam String otp) {
+        boolean success = userService.verifyOtpCode(email, otp);
+        if (success) {
+            return ResponseEntity.ok("Xác minh thành công! Bạn có thể đăng nhập ngay.");
+        } else {
+            return ResponseEntity.badRequest().body("Mã OTP không chính xác.");
+        }
+    }
+
     @PutMapping("/active/{id}")
 
     public ResponseEntity<?> updateUserStatusActive(@PathVariable String id){
@@ -145,7 +152,6 @@ public class UserController {
 
 
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/ban/{id}")
     public ResponseEntity<?> updateUserStatusBanned(@PathVariable String id){
         try{

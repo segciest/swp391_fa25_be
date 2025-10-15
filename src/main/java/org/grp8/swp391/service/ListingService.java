@@ -62,12 +62,11 @@ public class ListingService {
         User seller = validateAndGetSeller(listing.getSeller().getUserID());
 
         validateSubscription(seller);
-
+        listing.setCity(seller.getCity());
         listing.setCreatedAt(new Date());
         listing.setStatus(ListingStatus.PENDING);
         listing.setSeller(seller);
 
-        // ✅ Upload ảnh (nếu có)
         if (files != null && files.length > 0) {
             List<Image> images = uploadImages(files, listing);
             listing.setImages(images);
@@ -301,6 +300,10 @@ public class ListingService {
 
                 imageUrls
         );
+    }
+
+    public Page<Listing> findBySellerCity(String sellerCity, Pageable pageable) {
+        return listingRepo.findByCityIgnoreCase(sellerCity, pageable);
     }
 
 

@@ -73,6 +73,9 @@ public class Listing {
     private Double price;
     @Column(name = "Contact",nullable = false)
     private String contact;
+    @Column(name = "City", columnDefinition = "NVARCHAR(100)")
+    private String city;
+
     @Enumerated(EnumType.STRING)
     private ListingStatus status;
     @Column(name = "Create_At",nullable = false)

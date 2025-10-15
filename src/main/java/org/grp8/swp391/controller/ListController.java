@@ -65,6 +65,22 @@ public class ListController {
                 .toList();
         return ResponseEntity.ok(lis);
     }
+
+
+    @GetMapping("/filter/city")
+    public ResponseEntity<?> filterByCity(@RequestParam String city,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Listing> listings = listingService.findBySellerCity(city, pageable);
+        List<ListingResponse> result = listings.getContent()
+                .stream()
+                .map(listingService::toListingResponse)
+                .toList();
+        return ResponseEntity.ok(result);
+    }
+
+
     @GetMapping("/pending")
     public ResponseEntity<?> getAllPendingListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size){
         Pageable pageable = PageRequest.of(page, size);
@@ -106,7 +122,6 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectListing(@PathVariable String id) {
         try {
@@ -168,7 +183,6 @@ public class ListController {
                 .toList();
         return ResponseEntity.ok(response);
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getByStatus(@PathVariable ListingStatus status,
                                          @RequestParam(defaultValue = "0") int page,
