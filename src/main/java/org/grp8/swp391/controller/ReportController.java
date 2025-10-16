@@ -5,6 +5,7 @@ import org.grp8.swp391.entity.ReportedStatus;
 import org.grp8.swp391.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class ReportController {
         Report updated = reportService.updateReport(reportId, report);
         return ResponseEntity.ok(updated);
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/status/{reportId}")
     public ResponseEntity<?> updateReportStatus(@PathVariable Long reportId, ReportedStatus status){
         try {
