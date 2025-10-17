@@ -58,7 +58,7 @@ public class ListingService {
         return listingRepo.save(listing);
     }
 
-    public Listing createListing(Listing listing,git  MultipartFile[] files) {
+    public Listing createListing(Listing listing,  MultipartFile[] files) {
         User seller = validateAndGetSeller(listing.getSeller().getUserID());
 
         validateSubscription(seller);
