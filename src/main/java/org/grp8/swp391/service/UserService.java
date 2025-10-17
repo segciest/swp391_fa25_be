@@ -235,7 +235,6 @@ public class UserService {
         if(!u.getVerifiedCode().equals(otp)){
             throw new RuntimeException("Verification code does not match");
         }
-        u.setVerified(true);
         u.setVerifiedCode(null);
         userRepo.save(u);
         return true;
