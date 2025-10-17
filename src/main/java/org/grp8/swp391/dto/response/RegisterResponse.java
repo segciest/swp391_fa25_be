@@ -16,7 +16,7 @@ public class RegisterResponse {
         private String userName;
         private String userEmail;
         private String phone;
-        private Role roleName;
+        private String roleName;
         private UserStatus status;
 
 }

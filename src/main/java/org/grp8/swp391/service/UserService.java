@@ -2,6 +2,7 @@
 package org.grp8.swp391.service;
 
 import com.cloudinary.Cloudinary;
+import jakarta.transaction.Transactional;
 import org.grp8.swp391.dto.request.RegisterRequest;
 import org.grp8.swp391.dto.request.UpdateUserRequest;
 import org.grp8.swp391.entity.*;
@@ -35,6 +36,8 @@ public class UserService {
 
     @Autowired
     private SubRepo subRepo;
+
+
 
 
     @Autowired
@@ -91,12 +94,13 @@ public class UserService {
 
         return userRepo.findByUserEmail(email);
     }
-
+    @Transactional
     public void deleteById(String id){
         User check = userRepo.findByUserID(id);
         if (check == null) {
             throw new RuntimeException("User not found with id: " + id);
         }
+        userSubRepo.deleteByUser_UserID(id);
         userRepo.delete(check);
     }
 
@@ -185,6 +189,11 @@ public class UserService {
 
             userSub.setEndDate(null);
         }
+
+        userSub.setStatus("ACTIVE");
+
+
+
 
 
         userSubRepo.save(userSub);
