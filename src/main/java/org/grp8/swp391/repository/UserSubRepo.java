@@ -15,7 +15,7 @@ public interface UserSubRepo extends JpaRepository<User_Subscription, Long> {
     List<User_Subscription> findBySubscriptionId(Subscription subId);
     User_Subscription findByUserAndSubscriptionId(User user, Subscription subscription);
     List<User_Subscription> findByUser(User user);
-
+    void deleteByUser_UserID(String userId);
     User_Subscription findFirstByUserOrderByEndDateDesc(User user);
 
 

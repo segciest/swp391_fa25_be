@@ -41,7 +41,7 @@ public class UserController {
             res.setUserName(newUser.getUserName());
             res.setUserEmail(newUser.getUserEmail());
             res.setPhone(newUser.getPhone());
-            res.setRoleName(newUser.getRole());
+            res.setRoleName(newUser.getRole().getRoleName());
             res.setStatus(newUser.getUserStatus());
             return ResponseEntity.ok(res);
         }catch(RuntimeException e){
@@ -71,24 +71,34 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UpdateUserRequest us, @PathVariable String id){
-        try{
-            User u = userService.updateUser(us,id);
-            RegisterResponse res = new RegisterResponse();
-            res.setUserId(u.getUserID());
-            res.setUserName(u.getUserName());
-            res.setPhone(u.getPhone());
-            res.setUserEmail(u.getUserEmail());
-            res.setRoleName(u.getRole());
-            res.setStatus(u.getUserStatus());
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest req, HttpServletRequest request) {
+        try {
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
 
+            String email = jwtUtils.getUsernameFromToken(token);
+            User currentUser = userService.findByUserEmail(email);
+
+            User updated = userService.updateUser(req, currentUser.getUserID());
+
+            RegisterResponse res = new RegisterResponse();
+            res.setUserId(updated.getUserID());
+            res.setUserName(updated.getUserName());
+            res.setPhone(updated.getPhone());
+            res.setUserEmail(updated.getUserEmail());
+            res.setRoleName(updated.getRole().getRoleName());
+            res.setStatus(updated.getUserStatus());
 
             return ResponseEntity.ok(res);
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable String id){
         User u = userService.findUserById(id);
