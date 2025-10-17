@@ -23,6 +23,7 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "reviewd_user", nullable = false)
     private User reviewedUser;
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String comment;
     private int rate;
     @Temporal(TemporalType.TIMESTAMP)

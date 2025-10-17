@@ -39,3 +39,4 @@ build/
 
 frontend/
 src/main/resources/application-local.properties
+docs/

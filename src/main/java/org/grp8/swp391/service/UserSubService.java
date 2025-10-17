@@ -93,7 +93,7 @@ public class UserSubService {
 
 
     public int getRemainingDate(User user){
-        User_Subscription userSub = userSubRepo.findTopByUserOrderByEndDateDesc(user);
+        User_Subscription userSub = userSubRepo.findFirstByUserOrderByEndDateDesc(user);
 
         if(userSub == null){
             throw new RuntimeException("User has no active subscription.");
