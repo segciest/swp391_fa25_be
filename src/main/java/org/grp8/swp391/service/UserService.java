@@ -169,6 +169,7 @@ public class UserService {
         user.setSubid(freeSub);
 
 
+
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
         User savedUser = userRepo.save(user);
 
@@ -190,10 +191,6 @@ public class UserService {
         }
 
         userSub.setStatus("ACTIVE");
-
-
-
-
 
         userSubRepo.save(userSub);
 
@@ -234,8 +231,9 @@ public class UserService {
         if(!u.getVerifiedCode().equals(otp)){
             throw new RuntimeException("Verification code does not match");
         }
-        u.setVerified(true);
+
         u.setVerifiedCode(null);
+        u.setUserStatus(UserStatus.ACTIVE);
         userRepo.save(u);
         return true;
 

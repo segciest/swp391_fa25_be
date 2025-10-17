@@ -66,6 +66,7 @@ public class ListingService {
         listing.setCreatedAt(new Date());
         listing.setStatus(ListingStatus.PENDING);
         listing.setSeller(seller);
+        listing.setContact(seller.getPhone());
 
         if (files != null && files.length > 0) {
             List<Image> images = uploadImages(files, listing);

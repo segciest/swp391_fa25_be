@@ -60,8 +60,7 @@ public class User {
 
     @Column(name = "Avatar_Url")
     private String avatarUrl;
-    @Column(name = "Verified",  nullable = true)
-    private Boolean verified = false;
+
     @Column(name = "Verified_code")
     private String verifiedCode;
 }
