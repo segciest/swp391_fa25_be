@@ -21,7 +21,6 @@ public class User_Subscription {
     @ManyToOne
     @JoinColumn(name = "Sub_id", nullable = false)
     private Subscription subscriptionId;
-    private int duration;
     private Date startDate;
     private Date endDate;
     private String status;
