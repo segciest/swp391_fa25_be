@@ -169,7 +169,6 @@ public class UserService {
         user.setSubid(freeSub);
 
 
-
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
         User savedUser = userRepo.save(user);
 
@@ -189,6 +188,10 @@ public class UserService {
 
             userSub.setEndDate(null);
         }
+
+        userSub.setStatus("ACTIVE");
+
+
 
 
 
