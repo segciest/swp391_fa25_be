@@ -167,10 +167,10 @@ public class UserService {
         Subscription freeSub = subRepo.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Default FREE subscription (ID=1) not found"));
         user.setSubid(freeSub);
-        /*
+
         String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
         user.setVerifiedCode(otp);
-        */
+
 
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
         User savedUser = userRepo.save(user);
@@ -191,7 +191,7 @@ public class UserService {
 
             userSub.setEndDate(null);
         }
-        /*
+
         userSub.setStatus("ACTIVE");
         String subject = "Ma xac nhan cua ban";
         String body = "Xin chào " + req.getUserName() + ",\n\n"
@@ -200,7 +200,7 @@ public class UserService {
                 + "Vui lòng nhập mã này trong vòng 10 phút để kích hoạt tài khoản.\n\n"
                 + "Trân trọng,\n";
         emailVerifyService.sendEmailToUser(req.getUserEmail(),subject,body);
-        */
+
 
         userSubRepo.save(userSub);
 
@@ -228,24 +228,26 @@ public class UserService {
     }
 
 
-    public Boolean verifyOtpCode(String email, String otp){
-        User u = userRepo.findByUserEmail(email);
+    public Boolean verifyOtpCode( String otp){
+        User u = userRepo.findByVerifiedCode(otp);
         if (u == null) {
-            throw new RuntimeException("User not found with email: " + email);
-        }
-
-        if(u.getVerifiedCode() == null){
-            throw new RuntimeException("Verification code not found");
-        }
-
-        if(!u.getVerifiedCode().equals(otp)){
-            throw new RuntimeException("Verification code does not match");
+            return false;
         }
 
         u.setVerifiedCode(null);
         u.setUserStatus(UserStatus.ACTIVE);
         userRepo.save(u);
         return true;
+
+    }
+
+    public User findByUserCity(String city){
+        User u = userRepo.findByCityIgnoreCase(city);
+        if (u == null) {
+            throw new RuntimeException("User not found with city: " + city);
+        }
+
+        return u;
 
     }
 }

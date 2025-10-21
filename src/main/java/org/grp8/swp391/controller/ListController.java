@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.response.ListingDetailResponse;
 import org.grp8.swp391.dto.response.ListingResponse;
-import org.grp8.swp391.entity.Image;
+
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.ListingStatus;
 import org.grp8.swp391.entity.User;
@@ -18,14 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import org.grp8.swp391.service.CloudinaryService;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -173,6 +169,21 @@ public class ListController {
                 "data", listingService.toListingResponse(saved)
         ));
     }
+
+    @GetMapping("/city")
+    public ResponseEntity<?> getListingByUserCity(@RequestParam String city,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        try{
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Listing> listings = listingService.findBySellerCity(city, pageable);
+            List<ListingResponse> response = listings.getContent().stream()
+                    .map(listingService::toListingResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/seller/{id}")
     public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);

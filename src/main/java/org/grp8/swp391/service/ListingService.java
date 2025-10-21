@@ -172,7 +172,6 @@ public class ListingService {
         if (lis.getPrice() != null) {
             up.setPrice(lis.getPrice());
         }
-        // contract field removed - no longer handled
         if (lis.getStatus() != null) {
             up.setStatus(lis.getStatus());
         }
