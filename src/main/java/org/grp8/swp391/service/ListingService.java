@@ -58,7 +58,7 @@ public class ListingService {
         return listingRepo.save(listing);
     }
 
-    public Listing createListing(Listing listing, MultipartFile[] files) {
+    public Listing createListing(Listing listing,  MultipartFile[] files) {
         User seller = validateAndGetSeller(listing.getSeller().getUserID());
 
         validateSubscription(seller);
@@ -66,6 +66,7 @@ public class ListingService {
         listing.setCreatedAt(new Date());
         listing.setStatus(ListingStatus.PENDING);
         listing.setSeller(seller);
+        listing.setContact(seller.getPhone());
 
         if (files != null && files.length > 0) {
             List<Image> images = uploadImages(files, listing);
@@ -171,7 +172,6 @@ public class ListingService {
         if (lis.getPrice() != null) {
             up.setPrice(lis.getPrice());
         }
-        // contract field removed - no longer handled
         if (lis.getStatus() != null) {
             up.setStatus(lis.getStatus());
         }

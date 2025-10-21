@@ -130,6 +130,16 @@ public class UserController {
         }
     }
 
+    @GetMapping("/city")
+    public ResponseEntity<?> findByUserLocation(@RequestParam String city){
+        try{
+            User u = userService.findByUserCity(city);
+            return ResponseEntity.ok(u);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PutMapping("/role/{id}")
     public ResponseEntity<?> updateRole(@PathVariable String id,@RequestParam Long roleId){
         try{
@@ -141,8 +151,8 @@ public class UserController {
     }
     //chua can dung den
     @PostMapping("/verify")
-    public ResponseEntity<?> verify(@RequestParam String email, @RequestParam String otp) {
-        boolean success = userService.verifyOtpCode(email, otp);
+    public ResponseEntity<?> verify( @RequestParam String otp) {
+        boolean success = userService.verifyOtpCode( otp);
         if (success) {
             return ResponseEntity.ok("Xác minh thành công! Bạn có thể đăng nhập ngay.");
         } else {
