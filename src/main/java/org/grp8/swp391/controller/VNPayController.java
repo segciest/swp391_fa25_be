@@ -1,11 +1,18 @@
 package org.grp8.swp391.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.grp8.swp391.dto.request.VNPayPaymentRequest;
+import org.grp8.swp391.entity.Payment;
+import org.grp8.swp391.entity.PaymentStatus;
+import org.grp8.swp391.entity.User_Subscription;
+import org.grp8.swp391.repository.PaymentRepo;
+import org.grp8.swp391.repository.UserSubRepo;
 import org.grp8.swp391.service.VNPayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,35 +23,59 @@ public class VNPayController {
     @Autowired
     private VNPayService vnPayService;
 
+    @Autowired
+    private PaymentRepo paymentRepo;
+
+    @Autowired
+    private UserSubRepo userSubRepo;
+
     /**
      * Tạo URL thanh toán VNPay
      * POST /api/vnpay/create-payment
-     * 
-     * @param amount Số tiền (VNĐ) - sẽ tự động nhân 100 khi gửi VNPay
-     * @param orderInfo Thông tin đơn hàng
-     * @param orderId Mã đơn hàng (unique)
-     * @param bankCode (Optional) Mã ngân hàng - nếu null, khách chọn tại VNPay
-     *                 VD: NCB, VIETCOMBANK, VIETINBANK, AGRIBANK, etc.
+     * Body: { amount, orderInfo, subscriptionId, userId }
+     * BE sẽ tự động generate orderId unique
      */
     @PostMapping("/create-payment")
     public ResponseEntity<?> createPayment(
-            @RequestParam long amount,
-            @RequestParam String orderInfo,
-            @RequestParam String orderId,
-            @RequestParam(required = false) String bankCode,
+            @RequestBody VNPayPaymentRequest paymentRequest,
             HttpServletRequest request
     ) {
         try {
-            String ipAddress = vnPayService.getIpAddress(request);
-            String paymentUrl = vnPayService.createPaymentUrl(orderId, amount, orderInfo, ipAddress, bankCode);
+            // 1. Generate unique orderId
+            String orderId = vnPayService.generateOrderId(paymentRequest.getSubscriptionId());
             
-            Map<String, String> response = new HashMap<>();
+            // 2. Get User_Subscription
+            User_Subscription userSubscription = userSubRepo.findById(paymentRequest.getSubscriptionId())
+                    .orElseThrow(() -> new RuntimeException("Subscription not found"));
+            
+            // 3. Tạo Payment record trong DB với status PENDING
+            Payment payment = new Payment();
+            payment.setOrderId(orderId);
+            payment.setAmount(paymentRequest.getAmount().doubleValue());
+            payment.setOrderInfo(paymentRequest.getOrderInfo());
+            payment.setUserId(paymentRequest.getUserId());
+            payment.setUserSubscription(userSubscription);
+            payment.setMethod("VNPAY");
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setCreateDate(new Date());
+            paymentRepo.save(payment);
+            
+            // 4. Tạo payment URL (bankCode = null, user chọn tại VNPay)
+            String ipAddress = vnPayService.getIpAddress(request);
+            String paymentUrl = vnPayService.createPaymentUrl(
+                orderId, 
+                paymentRequest.getAmount(), 
+                paymentRequest.getOrderInfo(), 
+                ipAddress, 
+                null  // bankCode = null, user chọn ngân hàng tại VNPay
+            );
+            
+            // 5. Trả về response
+            Map<String, Object> response = new HashMap<>();
             response.put("paymentUrl", paymentUrl);
             response.put("orderId", orderId);
-            response.put("amount", String.valueOf(amount));
-            if (bankCode != null) {
-                response.put("bankCode", bankCode);
-            }
+            response.put("amount", paymentRequest.getAmount());
+            response.put("paymentId", payment.getPaymentId());
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -59,49 +90,68 @@ public class VNPayController {
     /**
      * Callback từ VNPay (IPN - Instant Payment Notification)
      * GET /api/vnpay/callback
+     * VNPay server gọi endpoint này để thông báo kết quả thanh toán
      */
     @GetMapping("/callback")
     public ResponseEntity<?> vnpayCallback(@RequestParam Map<String, String> params) {
         try {
-            // Verify signature
+            // 1. Verify signature
             boolean isValid = vnPayService.verifyCallback(params);
             
             if (!isValid) {
+                System.out.println("❌ Invalid signature from VNPay");
                 return ResponseEntity.badRequest().body(Map.of(
                     "RspCode", "97",
                     "Message", "Invalid signature"
                 ));
             }
 
-            // Lấy thông tin giao dịch
+            // 2. Lấy thông tin giao dịch
             String vnp_ResponseCode = params.get("vnp_ResponseCode");
             String vnp_TxnRef = params.get("vnp_TxnRef"); // orderId
-            String vnp_Amount = params.get("vnp_Amount");
             String vnp_TransactionNo = params.get("vnp_TransactionNo");
-            String vnp_PayDate = params.get("vnp_PayDate");
+            String vnp_BankCode = params.get("vnp_BankCode");
 
-            // Kiểm tra kết quả thanh toán
+            // 3. Tìm Payment trong DB
+            Payment payment = paymentRepo.findByOrderId(vnp_TxnRef);
+            if (payment == null) {
+                System.out.println("❌ Payment not found: " + vnp_TxnRef);
+                return ResponseEntity.badRequest().body(Map.of(
+                    "RspCode", "01",
+                    "Message", "Order not found"
+                ));
+            }
+
+            // 4. Kiểm tra kết quả thanh toán và update DB
             if ("00".equals(vnp_ResponseCode)) {
-                // Thanh toán thành công
-                // TODO: Cập nhật trạng thái đơn hàng trong database
+                // ✅ Thanh toán thành công
+                payment.setStatus(PaymentStatus.COMPLETED);
+                payment.setTransactionCode(vnp_TransactionNo);
+                payment.setResponseCode(vnp_ResponseCode);
+                payment.setBankCode(vnp_BankCode);
+                payment.setUpdatedAt(new Date());
+                payment.setProviderResponse(params.toString()); // Lưu raw response
+                paymentRepo.save(payment);
+                
                 System.out.println("✅ Payment successful: " + vnp_TxnRef);
                 
                 return ResponseEntity.ok(Map.of(
                     "RspCode", "00",
-                    "Message", "Success",
-                    "orderId", vnp_TxnRef,
-                    "amount", vnp_Amount,
-                    "transactionNo", vnp_TransactionNo,
-                    "payDate", vnp_PayDate
+                    "Message", "Success"
                 ));
             } else {
-                // Thanh toán thất bại
+                // ❌ Thanh toán thất bại
+                payment.setStatus(PaymentStatus.FAILED);
+                payment.setResponseCode(vnp_ResponseCode);
+                payment.setUpdatedAt(new Date());
+                payment.setProviderResponse(params.toString());
+                paymentRepo.save(payment);
+                
                 System.out.println("❌ Payment failed: " + vnp_TxnRef + " - Code: " + vnp_ResponseCode);
                 
                 return ResponseEntity.ok(Map.of(
-                    "RspCode", vnp_ResponseCode,
-                    "Message", "Payment failed",
-                    "orderId", vnp_TxnRef
+                    "RspCode", "00",
+                    "Message", "Confirmed"
                 ));
             }
             

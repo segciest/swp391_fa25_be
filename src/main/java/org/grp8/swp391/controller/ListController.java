@@ -11,6 +11,7 @@ import org.grp8.swp391.entity.ListingStatus;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.service.ListingService;
+import org.grp8.swp391.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +44,9 @@ public class ListController {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private NotificationService notificationService;
 
 
     @GetMapping
@@ -116,7 +120,11 @@ public class ListController {
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveListing(@PathVariable String id) {
         try {
-            Listing approveLis = listingService.updateListingStatus(id, ListingStatus.ACTIVE);
+            Listing approvedListing = listingService.updateListingStatus(id, ListingStatus.ACTIVE);
+            
+            // ✅ Gửi thông báo cho user khi bài đăng được duyệt
+            notificationService.notifyListingApproved(approvedListing.getSeller(), approvedListing);
+            
             return ResponseEntity.ok("Listing approved successfully with id: " + id);
         }catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -125,7 +133,11 @@ public class ListController {
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectListing(@PathVariable String id) {
         try {
-            Listing approveLis = listingService.updateListingStatus(id, ListingStatus.REJECTED);
+            Listing rejectedListing = listingService.updateListingStatus(id, ListingStatus.REJECTED);
+            
+            // ✅ Gửi thông báo cho user khi bài đăng bị từ chối
+            notificationService.notifyListingRejected(rejectedListing.getSeller(), rejectedListing);
+            
             return ResponseEntity.ok("Listing rejected successfully with id: " + id);
         }catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

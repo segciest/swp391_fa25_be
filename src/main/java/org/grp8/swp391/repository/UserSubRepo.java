@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -18,6 +19,7 @@ public interface UserSubRepo extends JpaRepository<User_Subscription, Long> {
     void deleteByUser_UserID(String userId);
     User_Subscription findFirstByUserOrderByEndDateDesc(User user);
 
-
+    // Tìm các subscription sắp hết hạn trong khoảng thời gian
+    List<User_Subscription> findByEndDateBetween(Date startDate, Date endDate);
 
 }
