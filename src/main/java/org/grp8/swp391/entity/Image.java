@@ -14,7 +14,7 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long imageId;
     @ManyToOne
-    @JoinColumn (name="listing_Id",nullable=false)
+    @JoinColumn (name="listing_Id")
     private Listing listingId;
     private String url;
 }

@@ -5,12 +5,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-
+import java.util.List;
 
 
 @Entity
@@ -23,15 +24,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "Id", nullable = false)
     private String userID;
-    @NotBlank
+    @NotBlank(message = "Tên người dùng không được để trống")
+
     @Column(name = "Name", nullable = false,columnDefinition = "NVARCHAR(100)")
     private String userName;
 
     @Column(name = "Email", nullable = false,unique = true)
     @Email
+    @NotBlank(message = "Email không được để trống")
     private String userEmail;
     @JsonIgnore
-
+    @Size(min = 5, max = 255, message = "Mật khẩu phải có ít nhất 6 ký tự")
     @Column(name = "Password", nullable = true)
     private String userPassword;
 
@@ -53,4 +56,18 @@ public class User {
     @Enumerated(EnumType.STRING)
 
     private UserStatus userStatus;
+    @Column(name = "Address", nullable = true,columnDefinition = "NVARCHAR(255)")
+    private String address;
+    @Column(name = "City", nullable = true,columnDefinition = "NVARCHAR(255)")
+    private String city;
+
+    @Column(name = "Avatar_Url")
+    private String avatarUrl;
+
+    @Column(name = "Verified_code")
+    private String verifiedCode;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Listing> listings;
 }

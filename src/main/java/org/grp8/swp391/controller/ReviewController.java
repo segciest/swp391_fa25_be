@@ -1,9 +1,13 @@
 package org.grp8.swp391.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.CreateReviewRequest;
 import org.grp8.swp391.entity.Review;
+import org.grp8.swp391.entity.User;
 import org.grp8.swp391.service.ReviewService;
+import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,15 +22,33 @@ public class ReviewController {
 
     @Autowired
     private ReviewService reviewService;
+
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private UserService userService;
+
+
     @GetMapping("/{reviewId}")
     public ResponseEntity<?> getReviewById(@PathVariable Long reviewId){
         Review re = reviewService.findById(reviewId);
         return ResponseEntity.ok().body(re);
     }
     @PostMapping("/create")
-    public ResponseEntity<?> createReview(@RequestBody CreateReviewRequest req){
+    public ResponseEntity<?> createReview( @RequestBody CreateReviewRequest req,HttpServletRequest request){
         try {
-            Review review = reviewService.createReview(req.getReviewerId(), req.getSellerId(), req.getRate(), req.getComment());
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+            String email = jwtUtils.getUsernameFromToken(token);
+            User reviewer = userService.findByUserEmail(email);
+
+            Review review = reviewService.createReview(reviewer.getUserID(), req.getSellerId(),req.getRate(), req.getComment()
+            );
+
             return ResponseEntity.ok(review);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -14,6 +14,7 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     Payment findByTransactionCode(String transactionCode);
     List<Payment> findByStatus(PaymentStatus status);
     List<Payment> findByMethod(String method);
+    Payment findByOrderId(String orderId);
 
     Payment findByPaymentId(Long paymentId);
 

@@ -8,9 +8,12 @@ import org.grp8.swp391.service.SubService;
 import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/subscription")
@@ -107,26 +110,33 @@ public class SubController {
 
             User updatedUser = subService.subPackage(user.getUserID(), subId);
 
-            return ResponseEntity.ok(updatedUser);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Đăng ký gói thành công!");
+            response.put("subscription", updatedUser.getSubid());
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    @PutMapping("/cacleSub")
-    public ResponseEntity<?> cancleSubscription(String userId,Long subId) {
-        try {
-             User u = userService.findUserById(userId);
-            if(u==null){
-                return ResponseEntity.badRequest().body("User not found");
+    @PutMapping("/cancel")
+    public ResponseEntity<?> cancleSubscription(@RequestParam Long subId, HttpServletRequest request) {
+        try{
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid token payload");
             }
-            Subscription sub = subService.findById(subId);
-            if(sub==null){
-                return ResponseEntity.badRequest().body("Subscription not found");
+            String email = jwtUtils.getUsernameFromToken(token);
+            if (email == null) {
+                return ResponseEntity.status(401).body("Invalid token payload");
             }
-            u.setSubid(null);
-            User updateUser = userService.save(u);
-            return ResponseEntity.ok().body(updateUser);
+            User user = userService.findByUserEmail(email);
+            User updatedUser = subService.canclePackage(user.getUserID(), subId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Hủy gói thành công!");
+            response.put("subscription", updatedUser.getSubid());
+            return ResponseEntity.ok(response);
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
