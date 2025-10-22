@@ -2,6 +2,7 @@ package org.grp8.swp391.service;
 
 import org.grp8.swp391.entity.ListingStatus;
 import org.grp8.swp391.entity.PaymentStatus;
+import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.repository.ListingRepo;
 import org.grp8.swp391.repository.PaymentRepo;
 import org.grp8.swp391.repository.UserRepo;
@@ -23,6 +24,24 @@ public class AdminDashService {
     public Long getTotalUsers() {
         return userRepo.count();
     }
+
+    public Long getPendingListing(){
+        return listingRepo.countByStatus(ListingStatus.PENDING);
+    }
+
+    public Long getBannedListing(){
+        return listingRepo.countByStatus(ListingStatus.BANNED);
+    }
+
+    public Long getBannedUser(){
+        return userRepo.countByUserStatus(UserStatus.BANNED);
+    }
+
+    public Long getActiveUser(){
+        return userRepo.countByUserStatus(UserStatus.ACTIVE);
+    }
+
+
 
     public Long getActiveListing(){
         return listingRepo.countByStatus(ListingStatus.ACTIVE);

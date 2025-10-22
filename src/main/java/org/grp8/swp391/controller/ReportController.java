@@ -85,6 +85,7 @@ public class ReportController {
             }
 
             String email = jwtUtils.getUsernameFromToken(token);
+
             User reporter = userService.findByUserEmail(email);
             if (reporter == null) {
                 return ResponseEntity.status(404).body("User not found");
@@ -109,13 +110,15 @@ public class ReportController {
             report.setStatus(ReportedStatus.PENDING);
             report.setCreateAt(new Date());
 
-            Report saved = reportService.createReport(report);
+            Report saved = reportService.createReport(reporter, listing, reason);
+
             return ResponseEntity.status(201).body(saved);
 
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getReportStatus(@PathVariable ReportedStatus status){

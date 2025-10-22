@@ -25,6 +25,10 @@ public class AdminDashController {
         stats.put("totalUsers", adminDashService.getTotalUsers());
         stats.put("activeListings", adminDashService.getActiveListing());
         stats.put("totalRevenue", adminDashService.getTotalRevenue());
+        stats.put("totalActiveUsers",adminDashService.getActiveUser());
+        stats.put("totalBannedUser" , adminDashService.getBannedUser());
+        stats.put("totalBannedListing", adminDashService.getBannedListing());
+        stats.put("totalPendingListing", adminDashService.getPendingListing());
         return ResponseEntity.ok(stats);
     }
 }

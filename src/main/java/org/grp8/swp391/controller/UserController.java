@@ -131,14 +131,15 @@ public class UserController {
     }
 
     @GetMapping("/city")
-    public ResponseEntity<?> findByUserLocation(@RequestParam String city){
-        try{
-            User u = userService.findByUserCity(city);
-            return ResponseEntity.ok(u);
-        }catch(RuntimeException e){
+    public ResponseEntity<?> findByUserLocation(@RequestParam String city) {
+        try {
+            List<User> users = userService.findByUserCity(city);
+            return ResponseEntity.ok(users);
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @PutMapping("/role/{id}")
     public ResponseEntity<?> updateRole(@PathVariable String id,@RequestParam Long roleId){

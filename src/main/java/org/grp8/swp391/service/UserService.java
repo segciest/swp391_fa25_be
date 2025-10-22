@@ -241,8 +241,8 @@ public class UserService {
 
     }
 
-    public User findByUserCity(String city){
-        User u = userRepo.findByCityIgnoreCase(city);
+    public List<User> findByUserCity(String city){
+        List<User> u = userRepo.findByCityIgnoreCase(city);
         if (u == null) {
             throw new RuntimeException("User not found with city: " + city);
         }

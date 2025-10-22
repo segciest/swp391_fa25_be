@@ -9,9 +9,8 @@ import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -86,12 +85,21 @@ public class ListingService {
     }
 
     private void validateSubscription(User seller) {
-        User_Subscription userSub = userSubRepo.findFirstByUserOrderByEndDateDesc(seller);
+        // ✅ Lấy subscription ACTIVE thay vì mới nhất
+        User_Subscription userSub = userSubRepo.findByUserAndStatus(seller, "ACTIVE");
+        
+        // Fallback: Nếu không có ACTIVE, lấy cái mới nhất
+        if (userSub == null) {
+            userSub = userSubRepo.findFirstByUserOrderByEndDateDesc(seller);
+        }
+        
         if (userSub == null) {
             throw new RuntimeException("You must subscribe to a package before posting listings.");
         }
 
         Date now = new Date();
+        
+        // Check if subscription is expired
         if (userSub.getEndDate() != null && userSub.getEndDate().before(now)) {
             throw new RuntimeException("Your subscription has expired. Please renew to continue posting.");
         }
@@ -101,12 +109,20 @@ public class ListingService {
             throw new RuntimeException("Subscription information not found for this user.");
         }
 
+        // Check if subscription status is ACTIVE
+        if (!"ACTIVE".equalsIgnoreCase(userSub.getStatus())) {
+            throw new RuntimeException("Your subscription is not active. Status: " + userSub.getStatus() + ". Please complete your payment or renew your subscription.");
+        }
+
+        // Check post limit based on subscription type
         if (sub.getSubName().equalsIgnoreCase("Free")) {
             long postCount = listingRepo.countListingsByUser(seller.getUserID());
             if (postCount >= 1) {
                 throw new RuntimeException("Free plan users can only post 1 listing. Please upgrade your plan.");
             }
         }
+        // For paid plans (Premium, Pro, etc.), no post limit
+        // Users with paid subscriptions can post unlimited listings
     }
 
 
