@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface PaymentRepo extends JpaRepository<Payment, Long> {
     Payment findByTransactionCode(String transactionCode);
+    Payment findByOrderId(String orderId);
+    
     List<Payment> findByStatus(PaymentStatus status);
     List<Payment> findByMethod(String method);
     Payment findByOrderId(String orderId);
@@ -24,7 +26,7 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
 
     List<Payment> findByUserSubscription_User_UserID(String userId);
 
-    @Query("SELECT p FROM Payment p WHERE p.userSubscription.user.userID = :userId")
+    @Query("SELECT p FROM Payment p WHERE p.userId = :userId ORDER BY p.createDate DESC")
     List<Payment> findByUserId(@Param("userId") String userId);
 
     Long countByStatus(PaymentStatus status);
