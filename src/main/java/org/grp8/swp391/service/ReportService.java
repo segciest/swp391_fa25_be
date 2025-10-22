@@ -1,8 +1,10 @@
 package org.grp8.swp391.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.Report;
 import org.grp8.swp391.entity.ReportedStatus;
+import org.grp8.swp391.entity.User;
 import org.grp8.swp391.repository.ReportRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,12 +17,21 @@ public class ReportService {
     @Autowired
     private ReportRepo reportRepo;
 
-    public Report createReport(Report report){
+    public Report createReport(User reporter, Listing listing, String reason) {
+        if (reportRepo.existsByReporterAndListing(reporter, listing)) {
+            throw new RuntimeException("You have already reported this listing.");
+        }
+
+        Report report = new Report();
+        report.setReporter(reporter);
+        report.setListing(listing);
+        report.setReason(reason);
         report.setStatus(ReportedStatus.PENDING);
         report.setCreateAt(new Date());
 
         return reportRepo.save(report);
     }
+
 
 
 

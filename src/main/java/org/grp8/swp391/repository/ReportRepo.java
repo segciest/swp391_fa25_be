@@ -17,7 +17,7 @@ public interface ReportRepo extends JpaRepository<Report,Long> {
     List<Report> findByStatus(ReportedStatus status);
 
     Report findByListingAndReporter(Listing listing, User reporter);
-
+    boolean existsByReporterAndListing(User reporter, Listing listing);
 
     void deleteByReportId(Long reportId);
 
