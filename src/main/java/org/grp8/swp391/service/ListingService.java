@@ -58,15 +58,15 @@ public class ListingService {
         return listingRepo.save(listing);
     }
 
-    public Listing createListing(Listing listing,  MultipartFile[] files) {
+    public Listing createListing(Listing listing, MultipartFile[] files) {
         User seller = validateAndGetSeller(listing.getSeller().getUserID());
 
         validateSubscription(seller);
         listing.setCity(seller.getCity());
+        listing.setContact(seller.getPhone());
         listing.setCreatedAt(new Date());
         listing.setStatus(ListingStatus.PENDING);
         listing.setSeller(seller);
-        listing.setContact(seller.getPhone());
 
         if (files != null && files.length > 0) {
             List<Image> images = uploadImages(files, listing);
@@ -172,6 +172,7 @@ public class ListingService {
         if (lis.getPrice() != null) {
             up.setPrice(lis.getPrice());
         }
+        // contract field removed - no longer handled
         if (lis.getStatus() != null) {
             up.setStatus(lis.getStatus());
         }
@@ -210,10 +211,10 @@ public class ListingService {
     }
 
     public Page<Listing> filterByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
-        return  listingRepo.findByPriceBetween(minPrice, maxPrice, pageable);
+        return listingRepo.findByPriceBetween(minPrice, maxPrice, pageable);
     }
 
-    public Page<Listing>  findByVehicleType(String vehicleType, Pageable pageable) {
+    public Page<Listing> findByVehicleType(String vehicleType, Pageable pageable) {
         return listingRepo.findByVehicleTypeIgnoreCase(vehicleType, pageable);
     }
 
@@ -305,8 +306,4 @@ public class ListingService {
     public Page<Listing> findBySellerCity(String sellerCity, Pageable pageable) {
         return listingRepo.findByCityIgnoreCase(sellerCity, pageable);
     }
-
-
-
-
 }

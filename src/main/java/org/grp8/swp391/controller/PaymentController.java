@@ -103,6 +103,20 @@ public class PaymentController {
         }
     }
 
+    /**
+     * Lấy tất cả payment của user (full entity) - cho chức năng hủy/retry
+     * GET /api/payment/user/{userId}/all
+     */
+    @GetMapping("/user/{userId}/all")
+    public ResponseEntity<?> getAllPaymentsByUser(@PathVariable String userId){
+        try{
+            List<Payment> payments = paymentService.findPaymentsByUserId(userId);
+            return ResponseEntity.ok().body(payments);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @PutMapping("/update/status/{id}")
     public ResponseEntity<?> updatePaymentStatus(@PathVariable Long id,@RequestBody PaymentStatus status){
         try{
@@ -113,7 +127,36 @@ public class PaymentController {
         }
     }
 
+    /**
+     * Hủy payment PENDING
+     * PUT /api/payment/cancel/{paymentId}
+     */
+    @PutMapping("/cancel/{paymentId}")
+    public ResponseEntity<?> cancelPayment(@PathVariable Long paymentId) {
+        try {
+            Payment payment = paymentService.findPaymentById(paymentId);
+            
+            if (payment == null) {
+                return ResponseEntity.badRequest().body("Payment not found");
+            }
+            
+            if (payment.getStatus() != PaymentStatus.PENDING) {
+                return ResponseEntity.badRequest().body("Only PENDING payment can be cancelled");
+            }
+            
+            payment.setStatus(PaymentStatus.CANCELLED);
+            payment.setUpdatedAt(new java.util.Date());
+            Payment updated = paymentService.updatePayment(paymentId, payment);
+            
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
 }
+
+
 
 

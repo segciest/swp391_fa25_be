@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.response.ListingDetailResponse;
 import org.grp8.swp391.dto.response.ListingResponse;
-
+import org.grp8.swp391.entity.Image;
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.ListingStatus;
 import org.grp8.swp391.entity.User;
@@ -19,10 +19,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import org.grp8.swp391.service.CloudinaryService;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +50,7 @@ public class ListController {
 
 
     @GetMapping
-    public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    public ResponseEntity<?> getAllListings(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Listing> listings = listingService.findAll(pageable);
         List<ListingDetailResponse> lis = listings.getContent()
@@ -81,6 +85,7 @@ public class ListController {
     }
 
 
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
     @GetMapping("/pending")
     public ResponseEntity<?> getAllPendingListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size){
         Pageable pageable = PageRequest.of(page, size);
@@ -113,6 +118,8 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveListing(@PathVariable String id) {
         try {
@@ -126,6 +133,8 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectListing(@PathVariable String id) {
         try {
@@ -167,19 +176,26 @@ public class ListController {
             ObjectMapper mapper = new ObjectMapper();
             listing = mapper.readValue(listingJson, Listing.class);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid listing JSON");
+            return ResponseEntity.badRequest().body("Invalid listing JSON: " + e.getMessage());
         }
 
+        // Lấy user từ JWT token và set làm seller (security - không tin FE)
         String email = jwtUtils.getUsernameFromToken(token);
         User seller = userRepo.findByUserEmail(email);
+        if (seller == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
         listing.setSeller(seller);
 
-        Listing saved = listingService.createListing(listing, files);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Đăng bài thành công!",
-                "data", listingService.toListingResponse(saved)
-        ));
+        try {
+            Listing saved = listingService.createListing(listing, files);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Đăng bài thành công!",
+                    "data", listingService.toListingResponse(saved)
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/city")

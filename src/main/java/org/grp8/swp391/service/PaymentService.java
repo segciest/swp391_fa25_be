@@ -171,4 +171,11 @@ public class PaymentService {
     public Payment findByOrderId(String orderId) {
         return paymentRepo.findByOrderId(orderId);
     }
+
+    /**
+     * Lấy tất cả payments của user (full entity) - cho chức năng hủy/retry
+     */
+    public List<Payment> findPaymentsByUserId(String userId) {
+        return paymentRepo.findByUserId(userId);
+    }
 }
