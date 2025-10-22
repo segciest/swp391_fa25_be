@@ -55,6 +55,9 @@ public class ReviewService {
         Review review = new Review();
         review.setReviewer(reviewer);
         review.setReviewedUser(seller);
+        if (rate < 1 || rate > 5) {
+            throw new RuntimeException("Rate must be between 1 and 5.");
+        }
         review.setRate(rate);
         review.setComment(comment);
         review.setCreateDate(new Date());

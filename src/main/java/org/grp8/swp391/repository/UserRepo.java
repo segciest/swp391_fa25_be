@@ -19,7 +19,7 @@ public interface UserRepo extends JpaRepository<User, String> {
     User findByUserEmailAndUserPassword(String userEmail, String userPassword);
     void deleteByUserID(String userID);
     User findByPhone(String phone);
-    User findByCityIgnoreCase(String city);
+    List<User> findByCityIgnoreCase(String city);
 
     User findByVerifiedCode(String code);
     Long countByUserStatus(UserStatus userStatus);
