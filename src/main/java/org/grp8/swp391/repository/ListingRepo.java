@@ -16,6 +16,7 @@ import java.util.List;
 public interface ListingRepo extends JpaRepository<Listing, String> {
     Listing findByListingId(String listingId);
 
+
     @Query("SELECT COUNT(l) FROM Listing l WHERE l.seller.userID = :userID")
     long countListingsByUser(@Param("userID") String userID);
 

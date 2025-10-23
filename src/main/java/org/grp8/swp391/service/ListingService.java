@@ -230,6 +230,8 @@ public class ListingService {
     }
 
 
+
+
     public ListingResponse toListingResponse(Listing listing) {
         List<String> urls = listing.getImages() != null
                 ? listing.getImages().stream().map(Image::getUrl).toList()
