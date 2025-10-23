@@ -174,4 +174,15 @@ public class VNPayService {
         }
         return ipAddress;
     }
+
+    /**
+     * Generate unique orderId
+     * Format: VNPAY_{subscriptionId}_{timestamp}_{random}
+     * VD: VNPAY_123_1698765432_A8F3D
+     */
+    public String generateOrderId(Long subscriptionId) {
+        long timestamp = System.currentTimeMillis();
+        String randomString = UUID.randomUUID().toString().substring(0, 5).toUpperCase();
+        return String.format("VNPAY_%d_%d_%s", subscriptionId, timestamp, randomString);
+    }
 }

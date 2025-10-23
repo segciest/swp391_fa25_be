@@ -12,9 +12,10 @@ import java.util.List;
 @Repository
 public interface PaymentRepo extends JpaRepository<Payment, Long> {
     Payment findByTransactionCode(String transactionCode);
+    Payment findByOrderId(String orderId);
+    
     List<Payment> findByStatus(PaymentStatus status);
     List<Payment> findByMethod(String method);
-    Payment findByOrderId(String orderId);
 
     Payment findByPaymentId(Long paymentId);
 
@@ -24,8 +25,12 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
 
     List<Payment> findByUserSubscription_User_UserID(String userId);
 
-    @Query("SELECT p FROM Payment p WHERE p.userSubscription.user.userID = :userId")
+    // Query payments qua relationship userSubscription.user (đúng hơn là query trực tiếp userId column)
+    @Query("SELECT p FROM Payment p JOIN FETCH p.userSubscription us JOIN FETCH us.user u WHERE u.userID = :userId ORDER BY p.createDate DESC")
     List<Payment> findByUserId(@Param("userId") String userId);
+
+    @Query("SELECT p FROM Payment p JOIN FETCH p.userSubscription us JOIN FETCH us.user u WHERE u.userID = :userId AND p.status = :status ORDER BY p.createDate DESC")
+    List<Payment> findByUserIdAndStatus(@Param("userId") String userId, @Param("status") PaymentStatus status);
 
     Long countByStatus(PaymentStatus status);
     @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = :status")

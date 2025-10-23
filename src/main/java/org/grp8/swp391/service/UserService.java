@@ -168,8 +168,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Default FREE subscription (ID=1) not found"));
         user.setSubid(freeSub);
 
-        String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
-        user.setVerifiedCode(otp);
+        //String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
+        //user.setVerifiedCode(otp);
 
 
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
@@ -191,7 +191,7 @@ public class UserService {
 
             userSub.setEndDate(null);
         }
-
+/*
         userSub.setStatus("ACTIVE");
         String subject = "Ma xac nhan cua ban";
         String body = "Xin chào " + req.getUserName() + ",\n\n"
@@ -200,7 +200,7 @@ public class UserService {
                 + "Vui lòng nhập mã này trong vòng 10 phút để kích hoạt tài khoản.\n\n"
                 + "Trân trọng,\n";
         emailVerifyService.sendEmailToUser(req.getUserEmail(),subject,body);
-
+*/
 
         userSubRepo.save(userSub);
 
