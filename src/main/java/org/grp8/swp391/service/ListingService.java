@@ -82,6 +82,10 @@ public class ListingService {
         if (seller == null) {
             throw new RuntimeException("Seller not found.");
         }
+        if (seller.getUserStatus() != UserStatus.ACTIVE) {
+            throw new RuntimeException("You must verify your email before posting a listing.");
+        }
+
         return seller;
     }
 
@@ -230,7 +234,9 @@ public class ListingService {
         return listingRepo.findByStatus(ListingStatus.PENDING, pageable);
     }
 
-
+    public Page<Listing> findByTitle(String title, Pageable pageable) {
+        return listingRepo.findByTitleContaining(title, pageable);
+    }
 
 
     public ListingResponse toListingResponse(Listing listing) {

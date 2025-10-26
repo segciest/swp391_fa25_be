@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.grp8.swp391.entity.Role;
+import org.grp8.swp391.entity.Subscription;
 
 import java.util.Date;
 
@@ -17,7 +18,8 @@ public class LoginResponse {
     private String userEmail;
     private String phone;
     private Date dob;
-    private Role role;
+    private String role;
+    private String subName;
     private String userStatus;
     private String token;
 }

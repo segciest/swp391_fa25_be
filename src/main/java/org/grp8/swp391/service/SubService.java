@@ -3,6 +3,7 @@ package org.grp8.swp391.service;
 
 import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
+import org.grp8.swp391.entity.UserStatus;
 import org.grp8.swp391.entity.User_Subscription;
 import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
@@ -91,12 +92,29 @@ public class SubService {
             throw new RuntimeException("User not found");
         }
 
+        if (user.getUserStatus() != UserStatus.ACTIVE) {
+            throw new RuntimeException("Please verify your email before purchasing a package.");
+        }
+
         Subscription sub = subRepo.findBySubId(subId);
         if (sub == null) {
             throw new RuntimeException("Subscription not found");
         }
 
+        User_Subscription current = userSubRepo.findFirstByUserOrderByEndDateDesc(user);
+        if (current != null) {
+            String currentStatus = current.getStatus();
+            String currentName = current.getSubscriptionId().getSubName();
+
+            if ("ACTIVE".equalsIgnoreCase(currentStatus) && !"FREE".equalsIgnoreCase(currentName)) {
+                throw new RuntimeException("You already have an active subscription ("
+                        + currentName + "). Please cancel it before registering a new one.");
+            }
+        }
+
+
         User_Subscription userSub = new User_Subscription();
+
         userSub.setUser(user);
         userSub.setSubscriptionId(sub);
         userSub.setStatus("ACTIVE");
@@ -127,9 +145,31 @@ public class SubService {
         if(sub==null){
             throw new RuntimeException("Sub not found");
         }
+        User_Subscription current = userSubRepo.findFirstByUserOrderByEndDateDesc(user);
+        if (current == null || !"ACTIVE".equalsIgnoreCase(current.getStatus())) {
+            throw new RuntimeException("No active subscription found to cancel");
+        }
 
+        current.setStatus("CANCELLED");
+        userSubRepo.save(current);
         user.setSubid(null);
         return userRepo.save(user);
+    }
+
+    public void checkExpiredSubscription(){
+        Date now = new Date();
+        List<User_Subscription> activeSub = userSubRepo.findByStatus("ACTIVE");
+        for (User_Subscription us : activeSub) {
+            if(us.getEndDate() != null && us.getEndDate().before(now)){
+                us.setStatus("EXPIRED");
+                userSubRepo.save(us);
+            }
+            User u = new User();
+            Subscription sub = subRepo.findById(1L).orElseThrow(() -> new RuntimeException("Subscription not found"));
+            u.setSubid(sub);
+            userRepo.save(u);
+
+        }
     }
 
 

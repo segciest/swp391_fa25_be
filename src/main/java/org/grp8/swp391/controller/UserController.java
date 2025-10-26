@@ -106,6 +106,30 @@ public class UserController {
         return  ResponseEntity.ok(u);
     }
 
+    @PutMapping("/user-avatar")
+    public ResponseEntity<?> changeUserAvatar(@RequestParam("file") MultipartFile file, HttpServletRequest request){
+        try{
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+            String email = jwtUtils.getUsernameFromToken(token);
+            User u = userService.findByUserEmail(email);
+            if (u == null) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+
+            User changeAvatar = userService.changeUserAvatar(u.getUserID(), file);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Avatar updated successfully!",
+                    "avatarUrl", changeAvatar.getAvatarUrl()
+            ));
+
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -120,9 +144,9 @@ public class UserController {
             res.setUserEmail(user.getUserEmail());
             res.setPhone(user.getPhone());
             res.setUserStatus(user.getUserStatus().name());
-
+            res.setSubName(user.getSubid().getSubName());
             res.setDob(user.getDob());
-            res.setRole(user.getRole());
+            res.setRole(user.getRole().getRoleName());
             res.setToken(token);
             return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
@@ -133,7 +157,7 @@ public class UserController {
     @GetMapping("/city")
     public ResponseEntity<?> findByUserLocation(@RequestParam String city){
         try{
-            User u = userService.findByUserCity(city);
+            List<User> u = userService.findByUserCity(city);
             return ResponseEntity.ok(u);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());

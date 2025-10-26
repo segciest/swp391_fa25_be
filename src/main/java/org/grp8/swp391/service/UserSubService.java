@@ -41,6 +41,7 @@ public class UserSubService {
         Subscription sub = subRepo.findById(subId)
                 .orElseThrow(() -> new RuntimeException("Subscription not found"));
 
+
         User_Subscription userSub = new User_Subscription();
         userSub.setUser(user);
         userSub.setSubscriptionId(sub);
