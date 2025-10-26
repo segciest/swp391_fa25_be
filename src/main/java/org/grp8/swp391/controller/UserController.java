@@ -173,14 +173,33 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    //chua can dung den
     @PostMapping("/verify")
-    public ResponseEntity<?> verify( @RequestParam String otp) {
-        boolean success = userService.verifyOtpCode( otp);
-        if (success) {
-            return ResponseEntity.ok("Xác minh thành công! Bạn có thể đăng nhập ngay.");
-        } else {
-            return ResponseEntity.badRequest().body("Mã OTP không chính xác.");
+    public ResponseEntity<?> verify(@RequestParam String otp, HttpServletRequest request) {
+        try {
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+
+            String email = jwtUtils.getUsernameFromToken(token);
+            User user = userService.findByUserEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found");
+            }
+
+            boolean success = userService.verifyOtpCode(otp);
+            if (!success) {
+                return ResponseEntity.badRequest().body("Invalid or expired OTP");
+            }
+
+            User updated = userService.findByUserEmail(email);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Xác minh thành công! Bạn có thể sử dụng toàn bộ tính năng.",
+                    "userStatus", updated.getUserStatus().name()
+            ));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

@@ -240,7 +240,7 @@ public class UserService {
     }
 
 
-    public Boolean verifyOtpCode( String otp){
+    public Boolean verifyOtpCode(String otp){
         User u = userRepo.findByVerifiedCode(otp);
         if (u == null) {
             return false;
