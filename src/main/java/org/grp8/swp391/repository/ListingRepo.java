@@ -18,6 +18,11 @@ public interface ListingRepo extends JpaRepository<Listing, String> {
 
     @Query("SELECT COUNT(l) FROM Listing l WHERE l.seller.userID = :userID")
     long countListingsByUser(@Param("userID") String userID);
+    
+    // ✅ Đếm bài post TRONG KỲ subscription hiện tại (từ startDate đến now)
+    @Query("SELECT COUNT(l) FROM Listing l WHERE l.seller.userID = :userID " +
+           "AND l.createdAt >= :startDate")
+    long countListingsSinceDate(@Param("userID") String userID, @Param("startDate") java.util.Date startDate);
 
     Page<Listing> findBySeller_UserID(String sellerId, Pageable pageable);
     List<Listing> findBySeller_UserID(String sellerId);
@@ -36,5 +41,6 @@ public interface ListingRepo extends JpaRepository<Listing, String> {
     Page<Listing> findByPriceBetween(Double min, Double max, Pageable pageable);
     Long countByStatus(ListingStatus status);
     Page<Listing> findByCityIgnoreCase(String city, Pageable pageable);
+Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pageable);
 
 }

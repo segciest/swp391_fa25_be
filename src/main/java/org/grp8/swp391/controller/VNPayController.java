@@ -97,7 +97,18 @@ public class VNPayController {
                 }
             }
             
-            // 3. ✅ TẠO hoặc TÌM User_Subscription PENDING_PAYMENT
+            // 3. ✅ HỦY TẤT CẢ gói ACTIVE cũ (để chỉ giữ 1 gói active duy nhất)
+            // Logic: Khi paid hết hạn → scheduler sẽ tạo Free mới
+            List<User_Subscription> activeSubs = userSubRepo.findByUser(user);
+            for (User_Subscription activeSub : activeSubs) {
+                if ("ACTIVE".equals(activeSub.getStatus())) {
+                    activeSub.setStatus("CANCELLED");
+                    userSubRepo.save(activeSub);
+                    System.out.println("🔄 Cancelled old subscription: " + activeSub.getSubscriptionId().getSubName());
+                }
+            }
+            
+            // 4. ✅ TẠO hoặc TÌM User_Subscription PENDING_PAYMENT
             User_Subscription userSubscription;
             
             // Tìm xem đã có User_Subscription cho gói này chưa (status PENDING_PAYMENT hoặc FAILED)
@@ -131,10 +142,10 @@ public class VNPayController {
                 System.out.println("📝 Created new User_Subscription: " + userSubscription.getUserSubId());
             }
             
-            // 4. Generate unique orderId
+            // 5. Generate unique orderId
             String orderId = vnPayService.generateOrderId(userSubscription.getUserSubId());
             
-            // 5. ✅ TẠO Payment MỚI (1 subscription có thể có nhiều payment attempt)
+            // 6. ✅ TẠO Payment MỚI (1 subscription có thể có nhiều payment attempt)
             Payment payment = new Payment();
             payment.setOrderId(orderId);
             payment.setAmount(paymentRequest.getAmount().doubleValue());
@@ -156,7 +167,7 @@ public class VNPayController {
                 null  // bankCode = null, user chọn ngân hàng tại VNPay
             );
             
-            // 7. Trả về response
+            // 8. Trả về response
             Map<String, Object> response = new HashMap<>();
             response.put("paymentUrl", paymentUrl);
             response.put("orderId", orderId);
@@ -223,6 +234,19 @@ public class VNPayController {
                 // 🔥 Kích hoạt User_Subscription
                 User_Subscription userSub = payment.getUserSubscription();
                 if (userSub != null && userSub.getSubscriptionId() != null) {
+                    // ✅ HỦY TẤT CẢ gói ACTIVE cũ trước khi kích hoạt gói mới (đảm bảo chỉ 1 ACTIVE)
+                    User user = userSub.getUser();
+                    List<User_Subscription> oldActiveSubs = userSubRepo.findByUser(user);
+                    for (User_Subscription oldSub : oldActiveSubs) {
+                        if ("ACTIVE".equals(oldSub.getStatus()) && 
+                            !oldSub.getUserSubId().equals(userSub.getUserSubId())) {
+                            oldSub.setStatus("CANCELLED");
+                            userSubRepo.save(oldSub);
+                            System.out.println("🔄 [CALLBACK] Cancelled old subscription: " + oldSub.getSubscriptionId().getSubName());
+                        }
+                    }
+                    
+                    // ✅ Kích hoạt gói mới
                     userSub.setStatus("ACTIVE");
                     userSub.setStartDate(new Date());
                     
@@ -324,6 +348,19 @@ public class VNPayController {
                 // Kích hoạt User_Subscription
                 User_Subscription userSub = payment.getUserSubscription();
                 if (userSub != null && userSub.getSubscriptionId() != null) {
+                    // ✅ HỦY TẤT CẢ gói ACTIVE cũ trước khi kích hoạt gói mới (đảm bảo chỉ 1 ACTIVE)
+                    User user = userSub.getUser();
+                    List<User_Subscription> oldActiveSubs = userSubRepo.findByUser(user);
+                    for (User_Subscription oldSub : oldActiveSubs) {
+                        if ("ACTIVE".equals(oldSub.getStatus()) && 
+                            !oldSub.getUserSubId().equals(userSub.getUserSubId())) {
+                            oldSub.setStatus("CANCELLED");
+                            userSubRepo.save(oldSub);
+                            System.out.println("🔄 [RETURN] Cancelled old subscription: " + oldSub.getSubscriptionId().getSubName());
+                        }
+                    }
+                    
+                    // ✅ Kích hoạt gói mới
                     userSub.setStatus("ACTIVE");
                     userSub.setStartDate(new Date());
                     

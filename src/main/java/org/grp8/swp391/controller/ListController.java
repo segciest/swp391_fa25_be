@@ -277,4 +277,14 @@ public class ListController {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(listingService.filterByPriceRange(min, max, pageable));
     }
+    @GetMapping("/search/title")
+    public ResponseEntity<?> getByTitle(@RequestParam String title, @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "20") int size) {
+        try{
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.findByTitle(title, pageable));
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

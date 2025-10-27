@@ -85,16 +85,11 @@ public class ListingService {
     }
 
     private void validateSubscription(User seller) {
-        // ✅ Lấy subscription ACTIVE thay vì mới nhất
+        // ✅ Lấy subscription ACTIVE (bắt buộc phải có ACTIVE)
         User_Subscription userSub = userSubRepo.findByUserAndStatus(seller, "ACTIVE");
         
-        // Fallback: Nếu không có ACTIVE, lấy cái mới nhất
         if (userSub == null) {
-            userSub = userSubRepo.findFirstByUserOrderByEndDateDesc(seller);
-        }
-        
-        if (userSub == null) {
-            throw new RuntimeException("You must subscribe to a package before posting listings.");
+            throw new RuntimeException("You do not have an active subscription. Please purchase a subscription package to post listings.");
         }
 
         Date now = new Date();
@@ -322,4 +317,7 @@ public class ListingService {
     public Page<Listing> findBySellerCity(String sellerCity, Pageable pageable) {
         return listingRepo.findByCityIgnoreCase(sellerCity, pageable);
     }
+ public Page<Listing> findByTitle(String title, Pageable pageable) {
+        return listingRepo.findByTitleContaining(title, pageable);
+    }   
 }
