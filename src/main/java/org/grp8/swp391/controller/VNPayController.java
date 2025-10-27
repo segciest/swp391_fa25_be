@@ -98,7 +98,7 @@ public class VNPayController {
             }
             
             // 3. ✅ HỦY TẤT CẢ gói ACTIVE cũ (để chỉ giữ 1 gói active duy nhất)
-            // Logic: Khi paid hết hạn → scheduler sẽ tạo Free mới
+            // Logic: Khi paid hết hạn → Scheduler set EXPIRED → User phải mua gói mới
             List<User_Subscription> activeSubs = userSubRepo.findByUser(user);
             for (User_Subscription activeSub : activeSubs) {
                 if ("ACTIVE".equals(activeSub.getStatus())) {

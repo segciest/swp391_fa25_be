@@ -57,6 +57,18 @@ public class UserService {
 
     }
 
+    public User changeUserAvatar(String userId, MultipartFile file){
+        User u = userRepo.findByUserID(userId);
+        if(u == null){
+            throw new RuntimeException("User not found with id: " + userId);
+
+        }
+
+        String url = cloudinaryService.uploadFile(file);
+        u.setAvatarUrl(url);
+        return userRepo.save(u);
+    }
+
 
     public User updateUSerStatus(String id, UserStatus userStatus){
         User u = userRepo.findByUserID(id);
@@ -82,8 +94,8 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        if (user.getUserStatus() != UserStatus.ACTIVE) {
-            throw new RuntimeException("Your account is being Banned or Pending. Please contact admin for more information.");
+        if (user.getUserStatus() != UserStatus.ACTIVE && user.getUserStatus() != UserStatus.PENDING) {
+            throw new RuntimeException("Your account is being Banned. Please contact admin for more information.");
         }
         return user;
     }
@@ -230,7 +242,7 @@ public class UserService {
     }
 
 
-    public Boolean verifyOtpCode( String otp){
+    public Boolean verifyOtpCode(String otp){
         User u = userRepo.findByVerifiedCode(otp);
         if (u == null) {
             return false;

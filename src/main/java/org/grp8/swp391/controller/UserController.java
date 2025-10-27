@@ -106,6 +106,30 @@ public class UserController {
         return  ResponseEntity.ok(u);
     }
 
+    @PutMapping("/user-avatar")
+    public ResponseEntity<?> changeUserAvatar(@RequestParam("file") MultipartFile file, HttpServletRequest request){
+        try{
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+            String email = jwtUtils.getUsernameFromToken(token);
+            User u = userService.findByUserEmail(email);
+            if (u == null) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+
+            User changeAvatar = userService.changeUserAvatar(u.getUserID(), file);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Avatar updated successfully!",
+                    "avatarUrl", changeAvatar.getAvatarUrl()
+            ));
+
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -120,9 +144,9 @@ public class UserController {
             res.setUserEmail(user.getUserEmail());
             res.setPhone(user.getPhone());
             res.setUserStatus(user.getUserStatus().name());
-
+            res.setSubName(user.getSubid().getSubName());
             res.setDob(user.getDob());
-            res.setRole(user.getRole());
+            res.setRole(user.getRole().getRoleName());
             res.setToken(token);
             return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
@@ -131,15 +155,14 @@ public class UserController {
     }
 
     @GetMapping("/city")
-    public ResponseEntity<?> findByUserLocation(@RequestParam String city) {
-        try {
-            List<User> users = userService.findByUserCity(city);
-            return ResponseEntity.ok(users);
-        } catch (RuntimeException e) {
+    public ResponseEntity<?> findByUserLocation(@RequestParam String city){
+        try{
+            List<User> u = userService.findByUserCity(city);
+            return ResponseEntity.ok(u);
+        }catch(RuntimeException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 
     @PutMapping("/role/{id}")
     public ResponseEntity<?> updateRole(@PathVariable String id,@RequestParam Long roleId){
@@ -150,14 +173,33 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    //chua can dung den
     @PostMapping("/verify")
-    public ResponseEntity<?> verify( @RequestParam String otp) {
-        boolean success = userService.verifyOtpCode( otp);
-        if (success) {
-            return ResponseEntity.ok("Xác minh thành công! Bạn có thể đăng nhập ngay.");
-        } else {
-            return ResponseEntity.badRequest().body("Mã OTP không chính xác.");
+    public ResponseEntity<?> verify(@RequestParam String otp, HttpServletRequest request) {
+        try {
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+
+            String email = jwtUtils.getUsernameFromToken(token);
+            User user = userService.findByUserEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found");
+            }
+
+            boolean success = userService.verifyOtpCode(otp);
+            if (!success) {
+                return ResponseEntity.badRequest().body("Invalid or expired OTP");
+            }
+
+            User updated = userService.findByUserEmail(email);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Xác minh thành công! Bạn có thể sử dụng toàn bộ tính năng.",
+                    "userStatus", updated.getUserStatus().name()
+            ));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
