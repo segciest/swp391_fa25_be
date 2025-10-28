@@ -38,4 +38,15 @@ public interface ListingRepo extends JpaRepository<Listing, String> {
     Long countByStatus(ListingStatus status);
     Page<Listing> findByCityIgnoreCase(String city, Pageable pageable);
 
+
+    @Query("""
+    SELECT l FROM Listing l
+    JOIN l.seller u
+    JOIN u.subid s
+    WHERE l.status = 'ACTIVE'
+    ORDER BY s.priorityLevel DESC, l.createdAt DESC
+""")
+    Page<Listing> findAllListingByPriorityAndDate(Pageable pageable);
+
+
 }

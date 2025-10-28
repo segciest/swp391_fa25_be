@@ -127,66 +127,81 @@ public class ListingService {
     }
 
 
-    public Listing updateById(String id, Listing lis) {
-        Listing up = listingRepo.findById(id).orElseThrow(() -> new RuntimeException("Listing not found with id: " + id));
+    public Listing updateById(String id, Listing lis, User us) {
+        Listing up = listingRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Listing not found with id: " + id));
 
+        if (!up.getSeller().getUserID().equals(us.getUserID())
+                && !us.getRole().getRoleName().equalsIgnoreCase("ADMIN")) {
+            throw new RuntimeException("You do not have permission to edit this listing.");
+        }
 
-        if (lis.getTitle() != null) {
-            up.setTitle(lis.getTitle());
+        if (lis.getTitle() != null && !lis.getTitle().isBlank()) {
+            up.setTitle(lis.getTitle().trim());
         }
-        if (lis.getDescription() != null) {
-            up.setDescription(lis.getDescription());
+
+        if (lis.getDescription() != null && !lis.getDescription().isBlank()) {
+            up.setDescription(lis.getDescription().trim());
         }
+
         if (lis.getBrand() != null) {
-            up.setBrand(lis.getBrand());
+            up.setBrand(lis.getBrand().trim());
         }
+
         if (lis.getModel() != null) {
-            up.setModel(lis.getModel());
+            up.setModel(lis.getModel().trim());
         }
+
         if (lis.getColor() != null) {
-            up.setColor(lis.getColor());
+            up.setColor(lis.getColor().trim());
         }
-        if (lis.getYear() != null) {
+
+        if (lis.getYear() != null && lis.getYear() >= 1900) { // tránh năm vô lý
             up.setYear(lis.getYear());
         }
-        if (lis.getSeats() != null) {
+
+        if (lis.getSeats() != null && lis.getSeats() > 0) {
             up.setSeats(lis.getSeats());
         }
+
         if (lis.getVehicleType() != null) {
             up.setVehicleType(lis.getVehicleType());
         }
+
         if (lis.getMileage() != null) {
             up.setMileage(lis.getMileage());
         }
+
         if (lis.getBatteryCapacity() != null) {
             up.setBatteryCapacity(lis.getBatteryCapacity());
         }
-        if (lis.getCapacity() != null) {
+
+        if (lis.getCapacity() != null ) {
             up.setCapacity(lis.getCapacity());
         }
+
         if (lis.getVoltage() != null) {
             up.setVoltage(lis.getVoltage());
         }
-        if (lis.getCycleCount() != null) {
+
+        if (lis.getCycleCount() != null && lis.getCycleCount() >= 0) {
             up.setCycleCount(lis.getCycleCount());
         }
+
         if (lis.getBatteryLifeRemaining() != null) {
             up.setBatteryLifeRemaining(lis.getBatteryLifeRemaining());
         }
-        if (lis.getPrice() != null) {
+
+        if (lis.getPrice() != null && lis.getPrice() >= 0) {
             up.setPrice(lis.getPrice());
         }
-        // contract field removed - no longer handled
-        if (lis.getStatus() != null) {
-            up.setStatus(lis.getStatus());
-        }
-        if (lis.getCategory() != null) {
-            up.setCategory(lis.getCategory());
-        }
+
+
 
         up.setUpdatedAt(new Date());
         return listingRepo.save(up);
     }
+
 
 
     public Listing updateListingStatus(String id, ListingStatus status) {
@@ -314,4 +329,10 @@ public class ListingService {
     public Page<Listing> findBySellerCity(String sellerCity, Pageable pageable) {
         return listingRepo.findByCityIgnoreCase(sellerCity, pageable);
     }
+
+    public Page<Listing> getAllSortedByPriority(Pageable pageable) {
+        return listingRepo.findAllListingByPriorityAndDate(pageable);
+    }
+
+
 }

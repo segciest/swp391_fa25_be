@@ -33,14 +33,25 @@ public class FavoriteController {
     private JwtUtils jwtUtils;
 
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getFavoriteByUser(@PathVariable String userId){
-        User user = userService.findUserById(userId);
-        if(user==null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @GetMapping("/user")
+    public ResponseEntity<?> getFavoriteByUser(HttpServletRequest req){
+        try {
+            String token = jwtUtils.extractToken(req);
+            if (!jwtUtils.checkValidToken(token) || token == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            String email = jwtUtils.getUsernameFromToken(token);
+            if (email == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            User us = userService.findByUserEmail(email);
+
+
+            List<Favorite> favor = favoriteService.findByUser(us);
+            return new ResponseEntity<>(favor, HttpStatus.OK);
+        }catch(RuntimeException e){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<Favorite> favor = favoriteService.findByUser(user);
-        return new ResponseEntity<>(favor, HttpStatus.OK);
     }
 
     @PostMapping("/toggle")

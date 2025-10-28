@@ -62,12 +62,29 @@ public class ListController {
     @GetMapping("/active")
     public ResponseEntity<?> getAllActiveListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<Listing> listings = listingService.findAllActive(pageable);
+        Page<Listing> listings = listingService.getAllSortedByPriority(pageable);
+
         List<ListingDetailResponse> lis = listings.getContent()
                 .stream()
                 .map(listingService::toListingDetailResponse)
                 .toList();
+
         return ResponseEntity.ok(lis);
+    }
+
+    @GetMapping("/prior")
+    public ResponseEntity<?> getAllSortedListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Listing> listings = listingService.getAllSortedByPriority(pageable);
+            List<ListingDetailResponse> lis = listings.getContent()
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(lis);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 
 
@@ -156,9 +173,30 @@ public class ListController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateListing(@PathVariable String id, @RequestBody Listing listing) {
-        return ResponseEntity.ok(listingService.updateById(id, listing));
+    public ResponseEntity<?> updateListing(@PathVariable String id, @RequestBody Listing listing, HttpServletRequest request) {
+        try {
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+
+            String email = jwtUtils.getUsernameFromToken(token);
+            User user = userRepo.findByUserEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found");
+            }
+
+            Listing updated = listingService.updateById(id, listing, user);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Listing updated successfully!",
+                    "data", listingService.toListingDetailResponse(updated)
+            ));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
+
     @PostMapping(value = "/create", consumes = "multipart/form-data")
     public ResponseEntity<?> create(
             @RequestPart("listing") String listingJson,

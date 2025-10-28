@@ -119,37 +119,53 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    public User updateUser(UpdateUserRequest up, String id){
+    public User updateUser(UpdateUserRequest up, String id) {
         User check = userRepo.findByUserID(id);
         if (check == null) {
             throw new RuntimeException("User not found with id: " + id);
         }
 
-        if (up.getUserName() != null) {
-            check.setUserName(up.getUserName());
+        if (up.getUserName() != null && !up.getUserName().isBlank()) {
+            check.setUserName(up.getUserName().trim());
         }
+
         if (up.getUserEmail() != null && !up.getUserEmail().equalsIgnoreCase(check.getUserEmail())) {
-            if (userRepo.findByUserEmail(up.getUserEmail()) != null) {
-                throw new RuntimeException("Email already in use");
+            User existing = userRepo.findByUserEmail(up.getUserEmail());
+            if (existing != null && !existing.getUserID().equals(id)) {
+                throw new RuntimeException("Email already in use by another account");
             }
-            check.setUserEmail(up.getUserEmail());
+            check.setUserEmail(up.getUserEmail().trim().toLowerCase());
         }
+
         if (up.getPassword() != null && !up.getPassword().isBlank()) {
-            check.setUserPassword(passwordEncoder.encode(up.getPassword()));
+            if (!passwordEncoder.matches(up.getPassword(), check.getUserPassword())) {
+                check.setUserPassword(passwordEncoder.encode(up.getPassword()));
+            }
         }
+
         if (up.getDob() != null) {
             check.setDob(up.getDob());
         }
 
-        if (up.getPhone() != null) {
-            if (userRepo.findByPhone(up.getPhone()) != null) {
-                throw new RuntimeException("Phone already in use");
+        if (up.getPhone() != null && !up.getPhone().equals(check.getPhone())) {
+            User existingPhone = userRepo.findByPhone(up.getPhone());
+            if (existingPhone != null && !existingPhone.getUserID().equals(id)) {
+                throw new RuntimeException("Phone already in use by another account");
             }
-            check.setPhone(up.getPhone());
+            check.setPhone(up.getPhone().trim());
+        }
+
+        if (up.getCity() != null) {
+            check.setCity(up.getCity().trim());
+        }
+
+        if(up.getAddress() != null){
+            check.setAddress(up.getAddress().trim());
         }
 
         return userRepo.save(check);
     }
+
 
     public User registerUser(RegisterRequest req){
         if (userRepo.findByUserEmail(req.getUserEmail()) != null) {
