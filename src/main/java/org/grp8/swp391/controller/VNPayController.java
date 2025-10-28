@@ -97,7 +97,18 @@ public class VNPayController {
                 }
             }
             
-            // 3. ✅ TẠO hoặc TÌM User_Subscription PENDING_PAYMENT
+            // 3. ✅ HỦY TẤT CẢ gói ACTIVE cũ (để chỉ giữ 1 gói active duy nhất)
+            // Logic: Khi paid hết hạn → Scheduler set EXPIRED → User phải mua gói mới
+            List<User_Subscription> activeSubs = userSubRepo.findByUser(user);
+            for (User_Subscription activeSub : activeSubs) {
+                if ("ACTIVE".equals(activeSub.getStatus())) {
+                    activeSub.setStatus("CANCELLED");
+                    userSubRepo.save(activeSub);
+                    System.out.println("🔄 Cancelled old subscription: " + activeSub.getSubscriptionId().getSubName());
+                }
+            }
+            
+            // 4. ✅ TẠO hoặc TÌM User_Subscription PENDING_PAYMENT
             User_Subscription userSubscription;
             
             // Tìm xem đã có User_Subscription cho gói này chưa (status PENDING_PAYMENT hoặc FAILED)
@@ -131,10 +142,10 @@ public class VNPayController {
                 System.out.println("📝 Created new User_Subscription: " + userSubscription.getUserSubId());
             }
             
-            // 4. Generate unique orderId
+            // 5. Generate unique orderId
             String orderId = vnPayService.generateOrderId(userSubscription.getUserSubId());
             
-            // 5. ✅ TẠO Payment MỚI (1 subscription có thể có nhiều payment attempt)
+            // 6. ✅ TẠO Payment MỚI (1 subscription có thể có nhiều payment attempt)
             Payment payment = new Payment();
             payment.setOrderId(orderId);
             payment.setAmount(paymentRequest.getAmount().doubleValue());
@@ -156,7 +167,7 @@ public class VNPayController {
                 null  // bankCode = null, user chọn ngân hàng tại VNPay
             );
             
-            // 7. Trả về response
+            // 8. Trả về response
             Map<String, Object> response = new HashMap<>();
             response.put("paymentUrl", paymentUrl);
             response.put("orderId", orderId);
@@ -223,6 +234,19 @@ public class VNPayController {
                 // 🔥 Kích hoạt User_Subscription
                 User_Subscription userSub = payment.getUserSubscription();
                 if (userSub != null && userSub.getSubscriptionId() != null) {
+                    // ✅ HỦY TẤT CẢ gói ACTIVE cũ trước khi kích hoạt gói mới (đảm bảo chỉ 1 ACTIVE)
+                    User user = userSub.getUser();
+                    List<User_Subscription> oldActiveSubs = userSubRepo.findByUser(user);
+                    for (User_Subscription oldSub : oldActiveSubs) {
+                        if ("ACTIVE".equals(oldSub.getStatus()) && 
+                            !oldSub.getUserSubId().equals(userSub.getUserSubId())) {
+                            oldSub.setStatus("CANCELLED");
+                            userSubRepo.save(oldSub);
+                            System.out.println("🔄 [CALLBACK] Cancelled old subscription: " + oldSub.getSubscriptionId().getSubName());
+                        }
+                    }
+                    
+                    // ✅ Kích hoạt gói mới
                     userSub.setStatus("ACTIVE");
                     userSub.setStartDate(new Date());
                     
@@ -279,11 +303,12 @@ public class VNPayController {
     /**
      * Return URL - Trang người dùng quay về sau khi thanh toán
      * GET /api/vnpay/return
+     * CHÚ Ý: Endpoint này CŨNG update DB (vì IPN không hoạt động với localhost)
      */
     @GetMapping("/return")
     public ResponseEntity<?> vnpayReturn(@RequestParam Map<String, String> params) {
         try {
-            // Verify signature
+            // 1. Verify signature
             boolean isValid = vnPayService.verifyCallback(params);
             
             if (!isValid) {
@@ -293,15 +318,77 @@ public class VNPayController {
                 ));
             }
 
+            // 2. Lấy thông tin giao dịch
             String vnp_ResponseCode = params.get("vnp_ResponseCode");
             String vnp_TxnRef = params.get("vnp_TxnRef");
             String vnp_Amount = params.get("vnp_Amount");
             String vnp_TransactionNo = params.get("vnp_TransactionNo");
             String vnp_BankCode = params.get("vnp_BankCode");
 
+            // 3. Tìm Payment trong DB
+            Payment payment = paymentRepo.findByOrderId(vnp_TxnRef);
+            if (payment == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Order not found"
+                ));
+            }
+
+            // 4. ✅ UPDATE DB (giống callback, vì localhost không nhận IPN)
+            if ("00".equals(vnp_ResponseCode)) {
+                // Thanh toán thành công
+                payment.setStatus(PaymentStatus.COMPLETED);
+                payment.setTransactionCode(vnp_TransactionNo);
+                payment.setResponseCode(vnp_ResponseCode);
+                payment.setBankCode(vnp_BankCode);
+                payment.setUpdatedAt(new Date());
+                payment.setProviderResponse(params.toString());
+                paymentRepo.save(payment);
+                
+                // Kích hoạt User_Subscription
+                User_Subscription userSub = payment.getUserSubscription();
+                if (userSub != null && userSub.getSubscriptionId() != null) {
+                    // ✅ HỦY TẤT CẢ gói ACTIVE cũ trước khi kích hoạt gói mới (đảm bảo chỉ 1 ACTIVE)
+                    User user = userSub.getUser();
+                    List<User_Subscription> oldActiveSubs = userSubRepo.findByUser(user);
+                    for (User_Subscription oldSub : oldActiveSubs) {
+                        if ("ACTIVE".equals(oldSub.getStatus()) && 
+                            !oldSub.getUserSubId().equals(userSub.getUserSubId())) {
+                            oldSub.setStatus("CANCELLED");
+                            userSubRepo.save(oldSub);
+                            System.out.println("🔄 [RETURN] Cancelled old subscription: " + oldSub.getSubscriptionId().getSubName());
+                        }
+                    }
+                    
+                    // ✅ Kích hoạt gói mới
+                    userSub.setStatus("ACTIVE");
+                    userSub.setStartDate(new Date());
+                    
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Date());
+                    cal.add(Calendar.DAY_OF_MONTH, userSub.getSubscriptionId().getDuration());
+                    userSub.setEndDate(cal.getTime());
+                    
+                    userSubRepo.save(userSub);
+                    System.out.println("✅ Subscription activated via return URL: " + userSub.getUserSubId());
+                }
+                
+                System.out.println("✅ Payment successful (return): " + vnp_TxnRef);
+            } else {
+                // Thanh toán thất bại
+                payment.setStatus(PaymentStatus.FAILED);
+                payment.setResponseCode(vnp_ResponseCode);
+                payment.setUpdatedAt(new Date());
+                payment.setProviderResponse(params.toString());
+                paymentRepo.save(payment);
+                
+                System.out.println("❌ Payment failed (return): " + vnp_TxnRef + " - Code: " + vnp_ResponseCode);
+            }
+
+            // 5. Trả về response cho frontend
             Map<String, Object> response = new HashMap<>();
             response.put("orderId", vnp_TxnRef);
-            response.put("amount", Long.parseLong(vnp_Amount) / 100); // Chia 100 vì VNPay nhân 100
+            response.put("amount", Long.parseLong(vnp_Amount) / 100);
             response.put("transactionNo", vnp_TransactionNo);
             response.put("bankCode", vnp_BankCode);
             response.put("responseCode", vnp_ResponseCode);

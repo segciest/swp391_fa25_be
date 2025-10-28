@@ -1,4 +1,3 @@
-
 package org.grp8.swp391.config;
 
 import lombok.Data;

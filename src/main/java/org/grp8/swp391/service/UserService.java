@@ -219,8 +219,10 @@ public class UserService {
 
             userSub.setEndDate(null);
         }
-/*
+        
+        // ✅ Set ACTIVE ngay khi đăng ký (user có thể dùng Free luôn)
         userSub.setStatus("ACTIVE");
+/*
         String subject = "Ma xac nhan cua ban";
         String body = "Xin chào " + req.getUserName() + ",\n\n"
                 + "Cảm ơn bạn đã đăng ký tài khoản EV Marketplace.\n"

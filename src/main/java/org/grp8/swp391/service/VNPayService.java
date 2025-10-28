@@ -1,4 +1,3 @@
-
 package org.grp8.swp391.service;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +40,7 @@ public class VNPayService {
      */
     public String createPaymentUrl(String orderId, long amount, String orderInfo, String ipAddress, String bankCode) throws Exception {
         Map<String, String> vnp_Params = new HashMap<>();
-
+        
         vnp_Params.put("vnp_Version", "2.1.0");
         vnp_Params.put("vnp_Command", "pay");
         vnp_Params.put("vnp_TmnCode", tmnCode);
@@ -50,7 +49,7 @@ public class VNPayService {
         vnp_Params.put("vnp_TxnRef", orderId);
         vnp_Params.put("vnp_OrderInfo", orderInfo);
         vnp_Params.put("vnp_OrderType", "other");
-
+        
         // Thêm vnp_BankCode nếu được chỉ định (tùy chọn)
         // Nếu không có, khách hàng sẽ chọn ngân hàng tại trang VNPay
         if (bankCode != null && !bankCode.isEmpty()) {
@@ -65,7 +64,7 @@ public class VNPayService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-
+        
         cld.add(Calendar.MINUTE, 15); // Hết hạn sau 15 phút
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
@@ -73,10 +72,10 @@ public class VNPayService {
         // Build query string và tạo secure hash
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
-
+        
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
-
+        
         Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
             String fieldName = itr.next();
@@ -86,23 +85,23 @@ public class VNPayService {
                 hashData.append(fieldName);
                 hashData.append('=');
                 hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-
+                
                 // Build query
                 query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
                 query.append('=');
                 query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-
+                
                 if (itr.hasNext()) {
                     query.append('&');
                     hashData.append('&');
                 }
             }
         }
-
+        
         String queryUrl = query.toString();
         String vnp_SecureHash = hmacSHA512(hashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
-
+        
         return vnpayUrl + "?" + queryUrl;
     }
 
@@ -119,10 +118,10 @@ public class VNPayService {
         // Build hash data
         List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
-
+        
         StringBuilder hashData = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
-
+        
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = params.get(fieldName);
@@ -153,7 +152,7 @@ public class VNPayService {
             SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
             hmac512.init(secretKey);
             byte[] result = hmac512.doFinal(data.getBytes(StandardCharsets.UTF_8));
-
+            
             StringBuilder sb = new StringBuilder();
             for (byte b : result) {
                 sb.append(String.format("%02x", b));
