@@ -87,6 +87,10 @@ public class Listing {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
+    @Column(name = "expired_at")
+    private Date expiredAt;
+
+
 
 }
 

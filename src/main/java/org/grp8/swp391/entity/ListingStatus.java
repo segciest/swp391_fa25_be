@@ -4,7 +4,8 @@ public enum ListingStatus {
         PENDING,
         ACTIVE,
         BANNED,
-        REJECTED
+        REJECTED,
+        EXPIRED
 
 
 }

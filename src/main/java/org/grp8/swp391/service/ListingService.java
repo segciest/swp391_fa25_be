@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -209,6 +210,16 @@ public class ListingService {
         if (lis == null) {
             throw new RuntimeException("Listing not found with id: " + id);
         }
+
+        if(status.equals(ListingStatus.ACTIVE)) {
+            Date now = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(now);
+            cal.add(Calendar.DATE, 30);
+            lis.setExpiredAt(cal.getTime());
+
+        }
+
         lis.setStatus(status);
         return listingRepo.save(lis);
     }
@@ -334,5 +345,17 @@ public class ListingService {
         return listingRepo.findAllListingByPriorityAndDate(pageable);
     }
 
+
+    public void checkExpiredListing(Pageable pageable) {
+        Date now = new Date();
+        Page<Listing> active = listingRepo.findByStatus(ListingStatus.ACTIVE, pageable);
+        for(Listing lis : active){
+            if(lis.getExpiredAt() != null && lis.getExpiredAt().before(now)) {
+                lis.setStatus(ListingStatus.EXPIRED);
+                listingRepo.save(lis);
+            }
+        }
+
+    }
 
 }
