@@ -2,6 +2,7 @@ package org.grp8.swp391.service;
 
 import com.cloudinary.Cloudinary;
 import jakarta.transaction.Transactional;
+import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.RegisterRequest;
 import org.grp8.swp391.dto.request.UpdateUserRequest;
 import org.grp8.swp391.entity.*;
@@ -44,6 +45,8 @@ public class UserService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     public User updateUserRole(String id, Long roleId){
         User u = userRepo.findByUserID(id);
@@ -114,6 +117,7 @@ public class UserService {
         userSubRepo.deleteByUser_UserID(id);
         userRepo.delete(check);
     }
+
 
     public User save(User user){
         return userRepo.save(user);
@@ -279,6 +283,51 @@ public class UserService {
 
         return u;
 
+    }
+
+
+    public void sendResetPasswordOtp(String email){
+        User us = userRepo.findByUserEmail(email);
+        if (us == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
+        us.setVerifiedCode(otp);
+        userRepo.save(us);
+
+        String subject = "Mã xác nhận đặt lại mật khẩu";
+        String body = "Xin chào " + us.getUserName() + ",\n\n"
+                + "Mã OTP của bạn là: " + otp + "\n"
+                + "Mã này có hiệu lực trong vài phút.\n\n"
+                + "EV Marketplace Team";
+        emailVerifyService.sendEmailToUser(email, subject, body);
+    }
+
+    public String verifyResetOtpAndGenerateToken(String email, String otp) {
+        User us = userRepo.findByUserEmail(email);
+        if (us == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        if (us.getVerifiedCode() == null || !us.getVerifiedCode().equals(otp)) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        us.setVerifiedCode(null);
+        userRepo.save(us);
+
+        return jwtUtils.generateResetToken(email, 5); // 5 phút
+    }
+
+    public void resetUserPassword(String email, String password){
+        User check = userRepo.findByUserEmail(email);
+        if (check == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        check.setUserPassword(passwordEncoder.encode(password));
+        userRepo.save(check);
     }
 }
 

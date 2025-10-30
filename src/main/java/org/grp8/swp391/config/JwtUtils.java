@@ -3,6 +3,7 @@ package org.grp8.swp391.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,33 @@ public class JwtUtils {
 
     public boolean checkValidToken(String token) {
         try {
-            return parseClaims(token) != null;
+            Claims claims = parseClaims(token);
+            if (claims == null) return false;
+
+            Date expiration = claims.getExpiration();
+            if (expiration != null && expiration.before(new Date())) {
+                return false;
+            }
+
+            String type = claims.get("type", String.class);
+            if (type != null && type.equals("RESET_PASSWORD")) {
+                return true;
+            }
+
+            String email = claims.getSubject();
+            return email != null;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+
+    public String getEmailFromResetToken(String token) {
+        Claims claims = parseClaims(token);
+        if (claims != null && "RESET_PASSWORD".equals(claims.get("type", String.class))) {
+            return claims.getSubject();
+        }
+        throw new RuntimeException("Invalid or expired reset token");
     }
 
     private Claims parseClaims(String token) {
@@ -77,4 +101,28 @@ public class JwtUtils {
         }
         return null;
     }
+
+
+    public String generateResetToken(String email, int minutes) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + minutes * 60 * 1000);
+
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("type", "RESET_PASSWORD")
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(SignatureAlgorithm.HS256, jp.getSecret().getBytes())
+                .compact();
+    }
+
+    public boolean isResetToken(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            return claims != null && "RESET_PASSWORD".equals(claims.get("type", String.class));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }

@@ -71,6 +71,9 @@ public class UserController {
         }
     }
 
+
+
+
     @PutMapping("/profile")
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest req, HttpServletRequest request) {
         try {
@@ -248,6 +251,51 @@ public class UserController {
         }
 
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        try {
+            userService.sendResetPasswordOtp(email);
+            return ResponseEntity.ok(Map.of(
+                    "message", "OTP đặt lại mật khẩu đã được gửi đến email của bạn."
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<?> verifyResetOtp(@RequestParam String email, @RequestParam String otp) {
+        try {
+            String resetToken = userService.verifyResetOtpAndGenerateToken(email, otp);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Mã OTP hợp lệ. Bạn có thể đặt lại mật khẩu.",
+                    "resetToken", resetToken
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(HttpServletRequest request, @RequestParam String newPass) {
+        String token = jwtUtils.extractToken(request);
+        if (token == null || !jwtUtils.checkValidToken(token)) {
+            return ResponseEntity.status(401).body("Invalid or missing token");
+        }
+
+        String email = jwtUtils.getEmailFromResetToken(token);
+
+        try {
+            userService.resetUserPassword(email, newPass);
+            return ResponseEntity.ok(Map.of("message", "Mật khẩu của bạn đã được đặt lại thành công!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+
 
 }
 

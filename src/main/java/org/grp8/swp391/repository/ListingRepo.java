@@ -48,5 +48,8 @@ Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pagea
 """)
     Page<Listing> findAllListingByPriorityAndDate(Pageable pageable);
 
+    List<Listing> findByStatus(ListingStatus status);
+
+
 
 }

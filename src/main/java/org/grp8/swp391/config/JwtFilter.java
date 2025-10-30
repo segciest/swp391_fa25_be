@@ -34,8 +34,12 @@ public class JwtFilter extends OncePerRequestFilter {
             role = jwtUtils.getRoleFromToken(token);
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (token != null && jwtUtils.isResetToken(token)) {
+            chain.doFilter(req, res);
+            return;
+        }
 
+        if (username != null && role != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(username, null, Collections.singletonList(authority));
@@ -46,4 +50,5 @@ public class JwtFilter extends OncePerRequestFilter {
 
         chain.doFilter(req, res);
     }
+
 }

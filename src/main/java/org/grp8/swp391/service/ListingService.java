@@ -5,6 +5,7 @@ import org.grp8.swp391.dto.response.ListingDetailResponse;
 import org.grp8.swp391.dto.response.ListingResponse;
 import org.grp8.swp391.entity.*;
 import org.grp8.swp391.repository.ListingRepo;
+import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,11 @@ public class ListingService {
 
     @Autowired
     private UserSubRepo userSubRepo;
+
+    @Autowired
+    private SubRepo  subRepo;
+
+
 
     public Page<Listing> findAll(Pageable pageable) {
         return listingRepo.findAll(pageable);
@@ -106,7 +112,7 @@ public class ListingService {
             throw new RuntimeException("Subscription information not found for this user.");
         }
 
-        if (sub.getSubName().equalsIgnoreCase("Free")) {
+        if (userSub.getStatus().equalsIgnoreCase("ACTIVE") && sub.getSubName().equalsIgnoreCase("Free")) {
             long postCount = listingRepo.countListingsByUser(seller.getUserID());
             if (postCount >= 1) {
                 throw new RuntimeException("Free plan users can only post 1 listing. Please upgrade your plan.");
@@ -211,11 +217,31 @@ public class ListingService {
             throw new RuntimeException("Listing not found with id: " + id);
         }
 
+
+
         if(status.equals(ListingStatus.ACTIVE)) {
             Date now = new Date();
             Calendar cal = Calendar.getInstance();
             cal.setTime(now);
-            cal.add(Calendar.DATE, 30);
+
+            User seller = lis.getSeller();
+            if (seller != null && seller.getSubid() != null) {
+                String subName = seller.getSubid().getSubName();
+
+                if (subName.equalsIgnoreCase("Free")) {
+                    cal.add(Calendar.DATE, 30);
+                } else if (subName.equalsIgnoreCase("Basic")) {
+                    cal.add(Calendar.DATE, 60);
+                } else if (subName.equalsIgnoreCase("Premium")) {
+                    cal.add(Calendar.DATE, 75);
+                } else if (subName.equalsIgnoreCase("Vip")) {
+                    cal.add(Calendar.DATE, 90);
+                } else {
+                    cal.add(Calendar.DATE, 30);
+                }
+            } else {
+                cal.add(Calendar.DATE, 30);
+            }
             lis.setExpiredAt(cal.getTime());
 
         }
@@ -346,9 +372,9 @@ public class ListingService {
     }
 
 
-    public void checkExpiredListing(Pageable pageable) {
+    public void checkExpiredListing() {
         Date now = new Date();
-        Page<Listing> active = listingRepo.findByStatus(ListingStatus.ACTIVE, pageable);
+        List<Listing> active = listingRepo.findByStatus(ListingStatus.ACTIVE);
         for(Listing lis : active){
             if(lis.getExpiredAt() != null && lis.getExpiredAt().before(now)) {
                 lis.setStatus(ListingStatus.EXPIRED);

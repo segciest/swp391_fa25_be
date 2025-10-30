@@ -121,7 +121,6 @@ public class ListController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateListingStatus(@PathVariable String id, @RequestParam String status) {
         try {
@@ -135,13 +134,11 @@ public class ListController {
         }
     }
     
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveListing(@PathVariable String id) {
         try {
             Listing approvedListing = listingService.updateListingStatus(id, ListingStatus.ACTIVE);
             
-            // ✅ Gửi thông báo cho user khi bài đăng được duyệt
             notificationService.notifyListingApproved(approvedListing.getSeller(), approvedListing);
             
             return ResponseEntity.ok("Listing approved successfully with id: " + id);
@@ -216,7 +213,6 @@ public class ListController {
             return ResponseEntity.badRequest().body("Invalid listing JSON: " + e.getMessage());
         }
 
-        // Lấy user từ JWT token và set làm seller (security - không tin FE)
         String email = jwtUtils.getUsernameFromToken(token);
         User seller = userRepo.findByUserEmail(email);
         if (seller == null) {
@@ -325,14 +321,5 @@ public class ListController {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(listingService.filterByPriceRange(min, max, pageable));
     }
-    @GetMapping("/search/title")
-    public ResponseEntity<?> getByTitle(@RequestParam String title, @RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "20") int size) {
-        try{
-            Pageable pageable = PageRequest.of(page, size);
-            return ResponseEntity.ok(listingService.findByTitle(title, pageable));
-        }catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+
 }
