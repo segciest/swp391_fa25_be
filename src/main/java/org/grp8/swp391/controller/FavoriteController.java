@@ -43,22 +43,23 @@ public class FavoriteController {
         return new ResponseEntity<>(favor, HttpStatus.OK);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> addFavorite(HttpServletRequest req, @RequestParam String listingId) {
-        try{
-            String token = jwtUtils.extractToken(req);
-            if (token == null || !jwtUtils.checkValidToken(token)) {
-                return ResponseEntity.status(401).body("Invalid or missing token");
-            }
-
-            String email = jwtUtils.getUsernameFromToken(token);
-            User user = userService.findUserById(email);
-            Listing lis = listingService.findById(listingId);
-            Favorite fav = favoriteService.addFavorite(user, lis);
-            return ResponseEntity.status(HttpStatus.CREATED).body(fav);
-        }catch(RuntimeException e){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    @PostMapping("/toggle")
+    public ResponseEntity<?> toggleFavorite(HttpServletRequest req, @RequestParam String listingId) {
+        String token = jwtUtils.extractToken(req);
+        if (token == null || !jwtUtils.checkValidToken(token)) {
+            return ResponseEntity.status(401).body("Invalid or missing token");
         }
+
+        String email = jwtUtils.getUsernameFromToken(token);
+        User user = userService.findByUserEmail(email);
+        Listing listing = listingService.findById(listingId);
+
+        Favorite result = favoriteService.toggleFavorite(user, listing);
+
+        if (result == null) {
+            return ResponseEntity.ok("Removed from favorites");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
     @DeleteMapping("/remove")
     public ResponseEntity<?> deleteFavorite(HttpServletRequest req, @RequestParam String listingId) {

@@ -57,6 +57,18 @@ public class UserService {
 
     }
 
+    public User changeUserAvatar(String userId, MultipartFile file){
+        User u = userRepo.findByUserID(userId);
+        if(u == null){
+            throw new RuntimeException("User not found with id: " + userId);
+
+        }
+
+        String url = cloudinaryService.uploadFile(file);
+        u.setAvatarUrl(url);
+        return userRepo.save(u);
+    }
+
 
     public User updateUSerStatus(String id, UserStatus userStatus){
         User u = userRepo.findByUserID(id);
@@ -82,8 +94,8 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        if (user.getUserStatus() != UserStatus.ACTIVE) {
-            throw new RuntimeException("Your account is being Banned or Pending. Please contact admin for more information.");
+        if (user.getUserStatus() != UserStatus.ACTIVE && user.getUserStatus() != UserStatus.PENDING) {
+            throw new RuntimeException("Your account is being Banned. Please contact admin for more information.");
         }
         return user;
     }
@@ -168,8 +180,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Default FREE subscription (ID=1) not found"));
         user.setSubid(freeSub);
 
-        String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
-        user.setVerifiedCode(otp);
+        //String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
+        //user.setVerifiedCode(otp);
 
 
         user.setUserPassword(passwordEncoder.encode(req.getUserPassword()));
@@ -191,8 +203,10 @@ public class UserService {
 
             userSub.setEndDate(null);
         }
-
+        
+        // ✅ Set ACTIVE ngay khi đăng ký (user có thể dùng Free luôn)
         userSub.setStatus("ACTIVE");
+/*
         String subject = "Ma xac nhan cua ban";
         String body = "Xin chào " + req.getUserName() + ",\n\n"
                 + "Cảm ơn bạn đã đăng ký tài khoản EV Marketplace.\n"
@@ -200,7 +214,7 @@ public class UserService {
                 + "Vui lòng nhập mã này trong vòng 10 phút để kích hoạt tài khoản.\n\n"
                 + "Trân trọng,\n";
         emailVerifyService.sendEmailToUser(req.getUserEmail(),subject,body);
-
+*/
 
         userSubRepo.save(userSub);
 
@@ -228,7 +242,7 @@ public class UserService {
     }
 
 
-    public Boolean verifyOtpCode( String otp){
+    public Boolean verifyOtpCode(String otp){
         User u = userRepo.findByVerifiedCode(otp);
         if (u == null) {
             return false;
@@ -241,8 +255,8 @@ public class UserService {
 
     }
 
-    public User findByUserCity(String city){
-        User u = userRepo.findByCityIgnoreCase(city);
+    public List<User> findByUserCity(String city){
+        List<User> u = userRepo.findByCityIgnoreCase(city);
         if (u == null) {
             throw new RuntimeException("User not found with city: " + city);
         }

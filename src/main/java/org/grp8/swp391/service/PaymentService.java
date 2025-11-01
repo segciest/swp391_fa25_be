@@ -1,4 +1,3 @@
-
 package org.grp8.swp391.service;
 
 import org.grp8.swp391.dto.response.TransactionResponse;
@@ -65,10 +64,10 @@ public class PaymentService {
     }
 
     public Payment updatePayment(Long id,Payment payment) {
-        Payment pay = paymentRepo.findByPaymentId(id);
-        if(pay==null){
-            throw new RuntimeException("Payment not found");
-        }
+       Payment pay = paymentRepo.findByPaymentId(id);
+       if(pay==null){
+           throw new RuntimeException("Payment not found");
+       }
 
         if (payment.getAmount() != null) {
             pay.setAmount(payment.getAmount());
@@ -134,14 +133,14 @@ public class PaymentService {
         payment.setMethod("VNPAY");
         payment.setStatus(PaymentStatus.PENDING);
         payment.setCreateDate(new java.util.Date());
-
+        
         return paymentRepo.save(payment);
     }
 
     /**
      * Cập nhật payment sau khi nhận callback từ VNPay
      */
-    public Payment updateVNPayPayment(String orderId, String transactionCode, String responseCode,
+    public Payment updateVNPayPayment(String orderId, String transactionCode, String responseCode, 
                                       String bankCode, String providerResponse) {
         Payment payment = paymentRepo.findByOrderId(orderId);
         if (payment == null) {
@@ -171,5 +170,12 @@ public class PaymentService {
      */
     public Payment findByOrderId(String orderId) {
         return paymentRepo.findByOrderId(orderId);
+    }
+
+    /**
+     * Lấy tất cả payments của user (full entity) - cho chức năng hủy/retry
+     */
+    public List<Payment> findPaymentsByUserId(String userId) {
+        return paymentRepo.findByUserId(userId);
     }
 }

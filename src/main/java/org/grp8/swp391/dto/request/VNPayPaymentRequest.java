@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VNPayPaymentRequest {
-    private Long amount;           // Số tiền (VNĐ)
-    private String orderInfo;      // Thông tin đơn hàng
-    private String orderId;        // Mã đơn hàng
-    private Long subscriptionId;   // ID gói subscription (nếu có)
+    private Long amount;              // Số tiền (VNĐ)
+    private String orderInfo;         // Thông tin đơn hàng
+    private Long subscriptionId;      // ID gói subscription
+    private String userId;            // ID người dùng
 }

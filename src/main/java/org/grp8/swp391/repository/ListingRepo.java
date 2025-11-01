@@ -36,5 +36,6 @@ public interface ListingRepo extends JpaRepository<Listing, String> {
     Page<Listing> findByPriceBetween(Double min, Double max, Pageable pageable);
     Long countByStatus(ListingStatus status);
     Page<Listing> findByCityIgnoreCase(String city, Pageable pageable);
+Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pageable);
 
 }

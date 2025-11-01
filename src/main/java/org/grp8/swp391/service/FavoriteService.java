@@ -25,11 +25,12 @@ public class FavoriteService {
         return favoriteRepo.findById(id).orElse(null);
     }
 
-    public Favorite addFavorite(User user, Listing listing){
-        if(favoriteRepo.findByUserAndListing(user,listing).isPresent()){
-            throw new RuntimeException("this listing is already favorite!");
+    public Favorite toggleFavorite(User user, Listing listing) {
+        var existing = favoriteRepo.findByUserAndListing(user, listing);
+        if (existing.isPresent()) {
+            favoriteRepo.delete(existing.get());
+            return null;
         }
-
         Favorite favorite = new Favorite();
         favorite.setUser(user);
         favorite.setListing(listing);

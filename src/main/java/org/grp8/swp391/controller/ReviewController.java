@@ -6,6 +6,7 @@ import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.CreateReviewRequest;
 import org.grp8.swp391.entity.Review;
 import org.grp8.swp391.entity.User;
+import org.grp8.swp391.service.NotificationService;
 import org.grp8.swp391.service.ReviewService;
 import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class ReviewController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private NotificationService notificationService;
+
 
     @GetMapping("/{reviewId}")
     public ResponseEntity<?> getReviewById(@PathVariable Long reviewId){
@@ -48,6 +52,9 @@ public class ReviewController {
 
             Review review = reviewService.createReview(reviewer.getUserID(), req.getSellerId(),req.getRate(), req.getComment()
             );
+
+            // ✅ Gửi thông báo cho người được review
+            notificationService.notifyNewReview(review.getReviewedUser(), reviewer, req.getRate(), req.getComment());
 
             return ResponseEntity.ok(review);
         } catch (RuntimeException e) {
