@@ -23,4 +23,5 @@ public class RegisterRequest {
     private String phone;
     private Date dob;
     private Long subId;
+    private String city;
 }

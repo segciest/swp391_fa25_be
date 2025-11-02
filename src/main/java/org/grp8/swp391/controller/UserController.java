@@ -176,8 +176,8 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PostMapping("/verify")
-    public ResponseEntity<?> verify(@RequestParam String otp, HttpServletRequest request) {
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String otp, HttpServletRequest request) {
         try {
             String token = jwtUtils.extractToken(request);
             if (token == null || !jwtUtils.checkValidToken(token)) {
@@ -185,26 +185,18 @@ public class UserController {
             }
 
             String email = jwtUtils.getUsernameFromToken(token);
-            User user = userService.findByUserEmail(email);
-            if (user == null) {
-                return ResponseEntity.status(404).body("User not found");
+            boolean verified = userService.verifyOtpCode(email, otp);
+
+            if (!verified) {
+                return ResponseEntity.badRequest().body("Mã OTP không hợp lệ hoặc đã hết hạn.");
             }
 
-            boolean success = userService.verifyOtpCode(otp);
-            if (!success) {
-                return ResponseEntity.badRequest().body("Invalid or expired OTP");
-            }
-
-            User updated = userService.findByUserEmail(email);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Xác minh thành công! Bạn có thể sử dụng toàn bộ tính năng.",
-                    "userStatus", updated.getUserStatus().name()
-            ));
-
+            return ResponseEntity.ok(Map.of("message", "Xác minh email thành công! Tài khoản đã được kích hoạt."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     @PutMapping("/active/{id}")
 
@@ -256,26 +248,34 @@ public class UserController {
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         try {
             userService.sendResetPasswordOtp(email);
+            String resetToken = jwtUtils.generateResetToken(email, 10); // 10 phút
             return ResponseEntity.ok(Map.of(
-                    "message", "OTP đặt lại mật khẩu đã được gửi đến email của bạn."
-            ));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/verify-reset-otp")
-    public ResponseEntity<?> verifyResetOtp(@RequestParam String email, @RequestParam String otp) {
-        try {
-            String resetToken = userService.verifyResetOtpAndGenerateToken(email, otp);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Mã OTP hợp lệ. Bạn có thể đặt lại mật khẩu.",
+                    "message", "OTP đã được gửi đến email của bạn.",
                     "resetToken", resetToken
             ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<?> verifyResetOtp(HttpServletRequest request, @RequestParam String otp) {
+        String token = jwtUtils.extractToken(request);
+        if (token == null || !jwtUtils.checkValidToken(token)) {
+            return ResponseEntity.status(401).body("Invalid or missing token");
+        }
+
+        String email = jwtUtils.getEmailFromResetToken(token);
+        boolean verified = userService.verifyResetOtp(email, otp);
+
+        if (!verified) {
+            return ResponseEntity.badRequest().body("OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OTP hợp lệ, bạn có thể đặt lại mật khẩu."));
+    }
+
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(HttpServletRequest request, @RequestParam String newPass) {
@@ -285,14 +285,25 @@ public class UserController {
         }
 
         String email = jwtUtils.getEmailFromResetToken(token);
+        userService.resetUserPassword(email, newPass);
 
-        try {
-            userService.resetUserPassword(email, newPass);
-            return ResponseEntity.ok(Map.of("message", "Mật khẩu của bạn đã được đặt lại thành công!"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(Map.of("message", "Mật khẩu đã được đặt lại thành công!"));
     }
+
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(HttpServletRequest request) {
+        String token = jwtUtils.extractToken(request);
+        if (token == null || !jwtUtils.checkValidToken(token)) {
+            return ResponseEntity.status(401).body("Invalid or missing token");
+        }
+
+        String email = jwtUtils.getUsernameFromToken(token);
+        userService.sendEmailVerification(email);
+        return ResponseEntity.ok(Map.of("message", "Mã xác thực mới đã được gửi đến email của bạn."));
+    }
+
+
 
 
 

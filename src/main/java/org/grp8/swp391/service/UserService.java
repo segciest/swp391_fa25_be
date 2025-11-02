@@ -186,6 +186,7 @@ public class UserService {
         user.setUserEmail(req.getUserEmail());
         user.setPhone(req.getPhone());
         user.setDob(req.getDob());
+        user.setCity(req.getCity());
         user.setUserStatus(UserStatus.PENDING);
 
 
@@ -262,17 +263,18 @@ public class UserService {
     }
 
 
-    public Boolean verifyOtpCode(String otp){
-        User u = userRepo.findByVerifiedCode(otp);
-        if (u == null) {
+    public boolean verifyOtpCode(String email, String otp) {
+        User user = userRepo.findByUserEmail(email);
+        if (user == null) throw new RuntimeException("User not found");
+
+        if (user.getVerifiedCode() == null || !user.getVerifiedCode().equals(otp)) {
             return false;
         }
 
-        u.setVerifiedCode(null);
-        u.setUserStatus(UserStatus.ACTIVE);
-        userRepo.save(u);
+        user.setVerifiedCode(null);
+        user.setUserStatus(UserStatus.ACTIVE);
+        userRepo.save(user);
         return true;
-
     }
 
     public List<User> findByUserCity(String city){
@@ -304,6 +306,23 @@ public class UserService {
         emailVerifyService.sendEmailToUser(email, subject, body);
     }
 
+
+    public boolean verifyResetOtp(String email, String otp) {
+        User us = userRepo.findByUserEmail(email);
+        if (us == null) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        if (us.getVerifiedCode() == null || !us.getVerifiedCode().equals(otp)) {
+            return false;
+        }
+
+        us.setVerifiedCode(null);
+        userRepo.save(us);
+        return true;
+    }
+
+
     public String verifyResetOtpAndGenerateToken(String email, String otp) {
         User us = userRepo.findByUserEmail(email);
         if (us == null) {
@@ -329,5 +348,22 @@ public class UserService {
         check.setUserPassword(passwordEncoder.encode(password));
         userRepo.save(check);
     }
+
+    public void sendEmailVerification(String email) {
+        User user = userRepo.findByUserEmail(email);
+        if (user == null) throw new RuntimeException("User not found");
+
+        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
+        user.setVerifiedCode(otp);
+        userRepo.save(user);
+
+        String subject = "Mã xác thực tài khoản";
+        String body = "Xin chào " + user.getUserName() + ",\n\n"
+                + "Mã xác thực email của bạn là: " + otp + "\n"
+                + "Vui lòng nhập mã này trong vòng 10 phút.\n\n"
+                + "Trân trọng,\nEV Marketplace Team";
+        emailVerifyService.sendEmailToUser(email, subject, body);
+    }
+
 }
 
