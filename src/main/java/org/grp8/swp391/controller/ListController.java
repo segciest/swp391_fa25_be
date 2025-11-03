@@ -101,6 +101,7 @@ public class ListController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @GetMapping("/pending")
     public ResponseEntity<?> getAllPendingListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size){
@@ -121,6 +122,8 @@ public class ListController {
             return ResponseEntity.notFound().build();
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateListingStatus(@PathVariable String id, @RequestParam String status) {
         try {
@@ -133,7 +136,8 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveListing(@PathVariable String id) {
         try {
@@ -255,6 +259,8 @@ public class ListController {
                 .toList();
         return ResponseEntity.ok(response);
     }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getByStatus(@PathVariable ListingStatus status,
                                          @RequestParam(defaultValue = "0") int page,

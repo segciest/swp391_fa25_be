@@ -56,6 +56,7 @@ public class SubController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @PutMapping("/updateSub/{id}")
     public ResponseEntity<?> updateSubscription(@PathVariable Long id ,@RequestBody Subscription subscription) {
@@ -66,6 +67,7 @@ public class SubController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody Subscription subscription) {
@@ -76,6 +78,8 @@ public class SubController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id) {
         try {

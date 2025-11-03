@@ -166,6 +166,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @PutMapping("/role/{id}")
     public ResponseEntity<?> updateRole(@PathVariable String id,@RequestParam Long roleId){
@@ -197,6 +198,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @PutMapping("/active/{id}")
 
@@ -210,6 +212,8 @@ public class UserController {
 
 
     }
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+
     @PutMapping("/ban/{id}")
     public ResponseEntity<?> updateUserStatusBanned(@PathVariable String id){
         try{

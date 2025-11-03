@@ -45,6 +45,8 @@ public class ReportController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+
     public ResponseEntity<?> findAllReports(){
         List<Report> report = reportService.getAllReports();
         return ResponseEntity.ok().body(report);
