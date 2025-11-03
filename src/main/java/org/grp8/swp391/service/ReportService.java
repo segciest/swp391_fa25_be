@@ -1,6 +1,7 @@
 package org.grp8.swp391.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.grp8.swp391.dto.response.ReportResponse;
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.Report;
 import org.grp8.swp391.entity.ReportedStatus;
@@ -98,6 +99,41 @@ public class ReportService {
     public List<Report> findByResolveStatus() {
         return reportRepo.findByStatus(ReportedStatus.RESOLVED);
     }
+
+
+    public ReportResponse toReportResponse(Report report) {
+        if (report == null) return null;
+
+        Listing listing = report.getListing();
+        User reporter = report.getReporter();
+
+        String thumbnail = (listing != null && listing.getImages() != null && !listing.getImages().isEmpty())
+                ? listing.getImages().get(0).getUrl()
+                : null;
+
+        return new ReportResponse(
+                report.getReportId(),
+                reporter != null ? reporter.getUserID() : null,
+                reporter != null ? reporter.getUserName() : null,
+                reporter != null ? reporter.getUserEmail() : null,
+
+                listing != null ? listing.getListingId() : null,
+                listing != null ? listing.getTitle() : null,
+                (listing != null && listing.getSeller() != null) ? listing.getSeller().getUserName() : null,
+                thumbnail,
+
+                report.getReason(),
+                report.getStatus() != null ? report.getStatus().name() : null,
+                report.getCreateAt()
+        );
+    }
+
+    public List<ReportResponse> toReportResponseList(List<Report> reports) {
+        return reports.stream()
+                .map(this::toReportResponse)
+                .toList();
+    }
+
 
 
 
