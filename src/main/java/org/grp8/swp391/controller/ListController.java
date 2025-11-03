@@ -249,16 +249,29 @@ public class ListController {
         }
     }
 
-    @GetMapping("/seller/{id}")
-    public ResponseEntity<?> getByUser(@PathVariable String id, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    @GetMapping("/seller")
+    public ResponseEntity<?> getByUser(HttpServletRequest request, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Listing> listings = listingService.findBySellerId(id, pageable);
+        String token  = jwtUtils.extractToken(request);
+        if (token == null || !jwtUtils.checkValidToken(token)) {
+            return ResponseEntity.status(401).body("Invalid or missing token");
+        }
+
+        String email = jwtUtils.getUsernameFromToken(token);
+        User user = userRepo.findByUserEmail(email);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        Page<Listing> listings = listingService.findBySellerId(user.getUserID(), pageable);
         List<ListingResponse> response = listings.getContent()
                 .stream()
                 .map(listingService::toListingResponse)
                 .toList();
         return ResponseEntity.ok(response);
     }
+
+
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @GetMapping("/status/{status}")

@@ -2,6 +2,8 @@ package org.grp8.swp391.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.grp8.swp391.config.JwtUtils;
+import org.grp8.swp391.dto.response.ReportResponse;
+import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.Report;
 import org.grp8.swp391.entity.ReportedStatus;
 import org.grp8.swp391.entity.User;
@@ -62,6 +64,47 @@ public class ReportController {
         return ResponseEntity.ok().body(re);
     }
 
+    @GetMapping("/pending")
+    public ResponseEntity<?> findByPending(){
+        List<Report> list = reportService.findByPendingStatus();
+        return ResponseEntity.ok().body(list);
+    }
+
+    @PutMapping("/status/reject/{id}")
+    public ResponseEntity<?> updateRejectStatus(@PathVariable Long id){
+        try {
+            Report re = reportService.updateReportStatus(id, ReportedStatus.REJECTED);
+            return ResponseEntity.ok().body(re);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @PutMapping("/status/resolve/{id}")
+    public ResponseEntity<?> updateResolveStatus(@PathVariable Long id){
+        try {
+            Report re = reportService.updateReportStatus(id, ReportedStatus.RESOLVED);
+            return ResponseEntity.ok().body(re);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+
+    @GetMapping("/reject")
+    public ResponseEntity<?> findByRejected(){
+        List<Report> list = reportService.findByRejectStatus();
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/resolve")
+    public ResponseEntity<?> findByResolveStatus(){
+        List<Report> list = reportService.findByResolveStatus();
+        return ResponseEntity.ok().body(list);
+    }
+
     @PutMapping("/update/{reportId}")
     public ResponseEntity<Report> updateReport(@PathVariable Long reportId, @RequestBody Report report) {
         Report updated = reportService.updateReport(reportId, report);
@@ -78,6 +121,7 @@ public class ReportController {
         }
     }
 
+
     @PostMapping("/create")
     public ResponseEntity<?> createReport(@RequestBody Map<String, String> payload, HttpServletRequest request) {
         try {
@@ -87,7 +131,6 @@ public class ReportController {
             }
 
             String email = jwtUtils.getUsernameFromToken(token);
-
             User reporter = userService.findByUserEmail(email);
             if (reporter == null) {
                 return ResponseEntity.status(404).body("User not found");
@@ -95,29 +138,39 @@ public class ReportController {
 
             String listingId = payload.get("listingId");
             String reason = payload.get("reason");
-
             if (listingId == null || reason == null || reason.isBlank()) {
                 return ResponseEntity.badRequest().body("Missing listingId or reason");
             }
 
-            var listing = listingService.findById(listingId);
+            Listing listing = listingService.findById(listingId);
             if (listing == null) {
                 return ResponseEntity.status(404).body("Listing not found");
             }
 
-            Report report = new Report();
-            report.setReporter(reporter);
-            report.setListing(listing);
-            report.setReason(reason);
-            report.setStatus(ReportedStatus.PENDING);
-            report.setCreateAt(new Date());
-
             Report saved = reportService.createReport(reporter, listing, reason);
 
-            return ResponseEntity.status(201).body(saved);
+            ReportResponse res = new ReportResponse(
+                    saved.getReportId(),
+                    reporter.getUserID(),
+                    reporter.getUserName(),
+                    reporter.getUserEmail(),
+
+                    listing.getListingId(),
+                    listing.getTitle(),
+                    listing.getSeller() != null ? listing.getSeller().getUserName() : null,
+                    (listing.getImages() != null && !listing.getImages().isEmpty())
+                            ? listing.getImages().get(0).getUrl()
+                            : null,
+
+                    saved.getReason(),
+                    saved.getStatus().name(),
+                    saved.getCreateAt()
+            );
+
+            return ResponseEntity.status(201).body(res);
 
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

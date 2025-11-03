@@ -3,6 +3,7 @@ package org.grp8.swp391.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.grp8.swp391.config.JwtUtils;
+import org.grp8.swp391.dto.response.FavoriteResponse;
 import org.grp8.swp391.entity.Favorite;
 import org.grp8.swp391.entity.Listing;
 import org.grp8.swp391.entity.User;
@@ -34,23 +35,45 @@ public class FavoriteController {
 
 
     @GetMapping("/user")
-    public ResponseEntity<?> getFavoriteByUser(HttpServletRequest req){
+    public ResponseEntity<?> getFavoriteByUser(HttpServletRequest req) {
         try {
             String token = jwtUtils.extractToken(req);
-            if (!jwtUtils.checkValidToken(token) || token == null) {
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
             }
+
             String email = jwtUtils.getUsernameFromToken(token);
-            if (email == null) {
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            User user = userService.findByUserEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(404).body("User not found");
             }
-            User us = userService.findByUserEmail(email);
 
+            List<Favorite> favorites = favoriteService.findByUser(user);
 
-            List<Favorite> favor = favoriteService.findByUser(us);
-            return new ResponseEntity<>(favor, HttpStatus.OK);
-        }catch(RuntimeException e){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            List<FavoriteResponse> responses = favorites.stream().map(fav -> {
+                var listing = fav.getListing();
+                var seller = listing.getSeller();
+
+                String thumbnail = (listing.getImages() != null && !listing.getImages().isEmpty())
+                        ? listing.getImages().get(0).getUrl()
+                        : null;
+
+                return new FavoriteResponse(
+                        fav.getId(),
+                        listing.getListingId(),
+                        listing.getTitle(),
+                        listing.getPrice(),
+                        thumbnail,
+                        listing.getStatus() != null ? listing.getStatus().name() : null,
+                        seller != null ? seller.getUserName() : null,
+                        seller != null ? seller.getCity() : null,
+                        fav.getCreatedAt()
+                );
+            }).toList();
+
+            return ResponseEntity.ok(responses);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -70,6 +93,7 @@ public class FavoriteController {
         if (result == null) {
             return ResponseEntity.ok("Removed from favorites");
         }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
     @DeleteMapping("/remove")

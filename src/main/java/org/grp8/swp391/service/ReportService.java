@@ -87,6 +87,20 @@ public class ReportService {
         return reportRepo.save(check);
     }
 
+    public List<Report> findByRejectStatus() {
+        return reportRepo.findByStatus(ReportedStatus.REJECTED);
+    }
+
+    public List<Report> findByPendingStatus() {
+        return reportRepo.findByStatus(ReportedStatus.PENDING);
+    }
+
+    public List<Report> findByResolveStatus() {
+        return reportRepo.findByStatus(ReportedStatus.RESOLVED);
+    }
+
+
+
 
 
 
