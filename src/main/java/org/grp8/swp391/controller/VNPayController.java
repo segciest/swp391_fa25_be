@@ -258,6 +258,17 @@ public class VNPayController {
                     
                     userSubRepo.save(userSub);
                     System.out.println("✅ Subscription activated: " + userSub.getUserSubId());
+                    // Cập nhật trường subid trên bảng users để phản ánh gói hiện tại của user
+                    try {
+                        User u = userSub.getUser();
+                        if (u != null) {
+                            u.setSubid(userSub.getSubscriptionId());
+                            userRepo.save(u);
+                            System.out.println("🔄 Updated user's subid to: " + userSub.getSubscriptionId().getSubName());
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("⚠️ Failed to update user's subid: " + ex.getMessage());
+                    }
                 }
                 
                 System.out.println("✅ Payment successful: " + vnp_TxnRef);
@@ -371,6 +382,17 @@ public class VNPayController {
                     
                     userSubRepo.save(userSub);
                     System.out.println("✅ Subscription activated via return URL: " + userSub.getUserSubId());
+                        // Cập nhật trường subid trên bảng users để phản ánh gói hiện tại của user
+                        try {
+                            User u = userSub.getUser();
+                            if (u != null) {
+                                u.setSubid(userSub.getSubscriptionId());
+                                userRepo.save(u);
+                                System.out.println("🔄 Updated user's subid to: " + userSub.getSubscriptionId().getSubName());
+                            }
+                        } catch (Exception ex) {
+                            System.out.println("⚠️ Failed to update user's subid (return): " + ex.getMessage());
+                        }
                 }
                 
                 System.out.println("✅ Payment successful (return): " + vnp_TxnRef);
