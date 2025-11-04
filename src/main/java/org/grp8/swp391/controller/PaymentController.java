@@ -8,14 +8,23 @@ import org.grp8.swp391.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 import java.util.List;
+import org.grp8.swp391.config.JwtUtils;
+import org.grp8.swp391.repository.UserRepo;
+import org.grp8.swp391.entity.User;
 
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
     @Autowired
     private PaymentService  paymentService;
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private UserRepo userRepo;
     @PostMapping("/create")
     public ResponseEntity<?> createPayment(@RequestBody Payment payment) {
         paymentService.create(payment);
@@ -93,10 +102,26 @@ public class PaymentController {
 
 
     }
-    @GetMapping("/user/{id}")
-    public ResponseEntity<?> getHistory(@PathVariable String id){
+    /**
+     * Lấy transaction history của user (dựa trên JWT token)
+     * GET /api/payment/user/history
+     */
+    @GetMapping("/user/history")
+    public ResponseEntity<?> getHistory(HttpServletRequest request){
         try{
-            List<TransactionResponse> pay = paymentService.getTransHistory(id);
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body(Map.of("error", "Unauthorized", "message", "Invalid or missing token"));
+            }
+
+            String email = jwtUtils.getUsernameFromToken(token);
+            User user = userRepo.findByUserEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of("error", "NotFound", "message", "User not found"));
+            }
+
+            String userId = user.getUserID();
+            List<TransactionResponse> pay = paymentService.getTransHistory(userId);
             return ResponseEntity.ok().body(pay);
         }catch(RuntimeException e){
             return ResponseEntity.badRequest().build();
