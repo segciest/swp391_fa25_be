@@ -101,7 +101,6 @@ public class ListController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @GetMapping("/pending")
     public ResponseEntity<?> getAllPendingListings(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "20") int size){
@@ -122,7 +121,7 @@ public class ListController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+    @PreAuthorize("hasAuthority('ADMIN')")
 
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateListingStatus(@PathVariable String id, @RequestParam String status) {
@@ -136,7 +135,7 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+    @PreAuthorize("hasAuthority('ADMIN')")
 
     @PostMapping("/approve/{id}")
     public ResponseEntity<?> approveListing(@PathVariable String id) {
@@ -150,8 +149,8 @@ public class ListController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/reject/{id}")
     public ResponseEntity<?> rejectListing(@PathVariable String id) {
         try {
@@ -264,15 +263,15 @@ public class ListController {
         }
 
         Page<Listing> listings = listingService.findBySellerId(user.getUserID(), pageable);
-        List<ListingResponse> response = listings.getContent()
+        List<ListingDetailResponse> response = listings.getContent()
                 .stream()
-                .map(listingService::toListingResponse)
+                .map(listingService::toListingDetailResponse)
                 .toList();
         return ResponseEntity.ok(response);
     }
 
 
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
+    @PreAuthorize("hasAuthority('ADMIN')")
 
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getByStatus(@PathVariable ListingStatus status,

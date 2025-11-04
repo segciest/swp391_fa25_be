@@ -42,12 +42,12 @@ public class Listing {
 
     private String model;
     @Column(name = "Year", nullable = true)
-    @Min(value = 2010, message = "Year must be greater than or equal to 2010")
-    @Max(value = 2025, message = "Year must be less than or equal to 2025")
+    //@Min(value = 2010, message = "Year must be greater than or equal to 2010")
+    //@Max(value = 2025, message = "Year must be less than or equal to 2025")
     private Integer year;
     @Column(name = "Seat", nullable = true)
-    @Min(value = 2, message = "Seats must be at least 2")
-    @Max(value = 7, message = "Seats cannot exceed 7")
+    //@Min(value = 2, message = "Seats must be at least 2")
+    //@Max(value = 7, message = "Seats cannot exceed 7")
     private Integer seats;
     @Column(name = "Vehicle_type", nullable = true,columnDefinition = "NVARCHAR(255)")
 
