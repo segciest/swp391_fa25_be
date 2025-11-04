@@ -12,6 +12,7 @@ import org.grp8.swp391.entity.User;
 import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.service.ListingService;
 import org.grp8.swp391.service.NotificationService;
+import org.grp8.swp391.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +48,8 @@ public class ListController {
 
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private UserService userService;
 
 
     @GetMapping
@@ -338,6 +341,26 @@ public class ListController {
     public ResponseEntity<?> filterByPrice(@RequestParam Double min,@RequestParam Double max,@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(listingService.filterByPriceRange(min, max, pageable));
+    }
+
+    @GetMapping("/user-listing")
+    public ResponseEntity<?> findByUserIdAndStatus(HttpServletRequest request,@RequestParam ListingStatus status){
+        try{
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or missing token");
+            }
+            String email = jwtUtils.getUsernameFromToken(token);
+            User u = userService.findByUserEmail(email);
+            List<Listing> lis = listingService.findBySellerAndStatus(u.getUserID(), status);
+            List<ListingDetailResponse> response = lis
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

@@ -1,8 +1,6 @@
 package org.grp8.swp391.repository;
 
-import org.grp8.swp391.entity.Listing;
-import org.grp8.swp391.entity.ListingStatus;
-import org.grp8.swp391.entity.User;
+import org.grp8.swp391.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +47,20 @@ Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pagea
     Page<Listing> findAllListingByPriorityAndDate(Pageable pageable);
 
     List<Listing> findByStatus(ListingStatus status);
+
+
+    @Query("""
+    SELECT l 
+    FROM Listing l 
+    WHERE l.status = 'PENDING' 
+    ORDER BY l.createdAt DESC
+""")
+    Page<Listing> findPendingListingsOrderByCreatedAtDesc(Pageable pageable);
+
+
+    List<Listing> findBySeller_UserIDAndStatus(String sellerId, ListingStatus status);
+
+
 
 
 

@@ -22,13 +22,28 @@ public class AdminDashController {
     @GetMapping
     public ResponseEntity<?> getDashboard() {
         Map<String, Object> stats = new HashMap<>();
+
         stats.put("totalUsers", adminDashService.getTotalUsers());
+        stats.put("activeUsers", adminDashService.getActiveUsers());
+        stats.put("bannedUsers", adminDashService.getBannedUsers());
+        stats.put("pendingUsers", adminDashService.getPendingUsers());
+
+        stats.put("freeUsers", adminDashService.getFreeUsers());
+        stats.put("basicUsers", adminDashService.getBasicUsers());
+        stats.put("standardUsers", adminDashService.getStandardUsers());
+        stats.put("premiumUsers", adminDashService.getPremiumUsers());
+        stats.put("vipUsers", adminDashService.getVIPUsers());
+
         stats.put("activeListings", adminDashService.getActiveListing());
+        stats.put("pendingListings", adminDashService.getPendingListing());
+        stats.put("bannedListings", adminDashService.getBannedListing());
+
+        stats.put("pendingReports", adminDashService.getPendingReports());
+        stats.put("resolvedReports", adminDashService.getResolvedReports());
+        stats.put("rejectedReports", adminDashService.getRejectedReports());
+
         stats.put("totalRevenue", adminDashService.getTotalRevenue());
-        stats.put("totalActiveUsers",adminDashService.getActiveUser());
-        stats.put("totalBannedUser" , adminDashService.getBannedUser());
-        stats.put("totalBannedListing", adminDashService.getBannedListing());
-        stats.put("totalPendingListing", adminDashService.getPendingListing());
+
         return ResponseEntity.ok(stats);
     }
 }

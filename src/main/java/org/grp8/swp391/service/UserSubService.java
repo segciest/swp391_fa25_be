@@ -1,6 +1,7 @@
 package org.grp8.swp391.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.grp8.swp391.entity.Subscription;
 import org.grp8.swp391.entity.User;
 import org.grp8.swp391.entity.User_Subscription;
@@ -32,7 +33,7 @@ public class UserSubService {
         userSubRepo.deleteById(id);
     }
 
-    public User_Subscription createUserSub(String userId, Long subId) {
+    /*public User_Subscription createUserSub(String userId, Long subId) {
         User user = userRepo.findByUserID(userId);
         if (user == null) {
             throw new RuntimeException("User not found");
@@ -65,6 +66,45 @@ public class UserSubService {
         return userSubRepo.save(userSub);
 
     }
+
+     */
+    @Transactional
+    public User_Subscription createUserSub(String userId, Long subId) {
+        User user = userRepo.findByUserID(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        Subscription sub = subRepo.findById(subId)
+                .orElseThrow(() -> new RuntimeException("Subscription not found"));
+
+        User_Subscription userSub = new User_Subscription();
+        userSub.setUser(user);
+        userSub.setSubscriptionId(sub);
+
+        Date startDate = new Date();
+        userSub.setStartDate(startDate);
+
+        int duration = sub.getDuration();
+        if (duration > 0) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            cal.add(Calendar.DAY_OF_MONTH, duration);
+            userSub.setEndDate(cal.getTime());
+        } else {
+            userSub.setEndDate(null);
+        }
+
+        userSub.setStatus("ACTIVE");
+        userSubRepo.save(userSub);
+
+        // ✅ Cập nhật lại subid trong user
+        user.setSubid(sub);
+        userRepo.save(user);
+
+        return userSub;
+    }
+
 
     public User_Subscription updateUserSub(Long id,User_Subscription userSub) {
         User_Subscription check = userSubRepo.findByUserSubId(id);

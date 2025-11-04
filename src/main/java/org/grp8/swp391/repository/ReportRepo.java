@@ -23,6 +23,6 @@ public interface ReportRepo extends JpaRepository<Report,Long> {
 
     Report findByReportId(Long reportId);
 
-
+    Long countByStatus(ReportedStatus status);
 
 }
