@@ -132,9 +132,25 @@ public class PaymentController {
      * Lấy tất cả payment của user (full entity) - cho chức năng hủy/retry
      * GET /api/payment/user/{userId}/all
      */
-    @GetMapping("/user/{userId}/all")
-    public ResponseEntity<?> getAllPaymentsByUser(@PathVariable String userId){
+    /**
+     * Lấy tất cả payment của user (full entity) - lấy userId từ JWT
+     * GET /api/payment/user/all
+     */
+    @GetMapping("/user/all")
+    public ResponseEntity<?> getAllPaymentsByUser(HttpServletRequest request){
         try{
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body(Map.of("error", "Unauthorized", "message", "Invalid or missing token"));
+            }
+
+            String email = jwtUtils.getUsernameFromToken(token);
+            User user = userRepo.findByUserEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of("error", "NotFound", "message", "User not found"));
+            }
+
+            String userId = user.getUserID();
             List<Payment> payments = paymentService.findPaymentsByUserId(userId);
             return ResponseEntity.ok().body(payments);
         }catch(RuntimeException e){
