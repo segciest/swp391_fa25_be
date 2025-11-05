@@ -34,4 +34,41 @@ public interface UserSubRepo extends JpaRepository<User_Subscription, Long> {
     @Query("SELECT us FROM User_Subscription us JOIN FETCH us.user WHERE us.userSubId = :id")
     Optional<User_Subscription> findByIdWithUser(@Param("id") Long id);
 
+    @Query(value = """
+    SELECT MONTH(us.start_date) AS month, COUNT(DISTINCT us.user_id) AS registrations
+    FROM User_Subscription us
+    WHERE YEAR(us.start_date) = YEAR(GETDATE())
+    GROUP BY MONTH(us.start_date)
+    ORDER BY MONTH(us.start_date)
+    """, nativeQuery = true)
+    List<Object[]> getMonthlyUserRegistrations();
+
+    @Query(value = """
+        SELECT CONCAT(YEAR(us.start_date), '-W', DATEPART(ISO_WEEK, us.start_date)) AS week,
+               COUNT(DISTINCT us.user_id) AS activated
+        FROM User_Subscription us
+        WHERE YEAR(us.start_date) = YEAR(GETDATE())
+        GROUP BY YEAR(us.start_date), DATEPART(ISO_WEEK, us.start_date)
+        ORDER BY week
+    """, nativeQuery = true)
+    List<Object[]> getSubscriptionWeeklyGrowth();
+
+    @Query(value = """
+        SELECT FORMAT(us.start_date, 'yyyy-MM') AS month,
+               COUNT(DISTINCT us.user_id) AS activated
+        FROM User_Subscription us
+        WHERE YEAR(us.start_date) = YEAR(GETDATE())
+        GROUP BY FORMAT(us.start_date, 'yyyy-MM')
+        ORDER BY month
+    """, nativeQuery = true)
+    List<Object[]> getSubscriptionMonthlyGrowth();
+
+    @Query(value = """
+        SELECT YEAR(us.start_date) AS year, COUNT(DISTINCT us.user_id) AS activated
+        FROM User_Subscription us
+        GROUP BY YEAR(us.start_date)
+        ORDER BY year
+    """, nativeQuery = true)
+    List<Object[]> getSubscriptionYearlyGrowth();
+
 }
