@@ -153,7 +153,7 @@ public class UserController {
             res.setToken(token);
             return ResponseEntity.ok(res);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

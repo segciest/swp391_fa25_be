@@ -97,7 +97,8 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        if (user.getUserStatus() != UserStatus.ACTIVE && user.getUserStatus() != UserStatus.PENDING) {
+
+        if (user.getUserStatus() == UserStatus.BANNED ) {
             throw new RuntimeException("Your account is being Banned. Please contact admin for more information.");
         }
         return user;
