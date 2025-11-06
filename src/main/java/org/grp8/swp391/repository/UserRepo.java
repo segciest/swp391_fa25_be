@@ -24,5 +24,24 @@ public interface UserRepo extends JpaRepository<User, String> {
     User findByVerifiedCode(String code);
     Long countByUserStatus(UserStatus userStatus);
 
+    @Query("SELECT COUNT(u) FROM User u WHERE u.subid.subName = 'Free'")
+    Long countUsersWithFreeSubscription();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.subid.subName = 'Basic'")
+    Long countUsersWithBasicSubscription();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.subid.subName = 'Standard'")
+    Long countUsersWithStandardSubscription();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.subid.subName = 'Premium'")
+    Long countUsersWithPremiumSubscription();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.subid.subName = 'VIP'")
+    Long countUsersWithVIPSubscription();
+
+
+
+
+
 
 }

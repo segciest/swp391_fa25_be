@@ -1,6 +1,5 @@
 package org.grp8.swp391.controller;
 
-
 import org.grp8.swp391.service.AdminDashService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,26 +8,104 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/dashboard")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminDashController {
 
     @Autowired
     private AdminDashService adminDashService;
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping
-    public ResponseEntity<?> getDashboard() {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalUsers", adminDashService.getTotalUsers());
-        stats.put("activeListings", adminDashService.getActiveListing());
-        stats.put("totalRevenue", adminDashService.getTotalRevenue());
-        stats.put("totalActiveUsers",adminDashService.getActiveUser());
-        stats.put("totalBannedUser" , adminDashService.getBannedUser());
-        stats.put("totalBannedListing", adminDashService.getBannedListing());
-        stats.put("totalPendingListing", adminDashService.getPendingListing());
-        return ResponseEntity.ok(stats);
+
+    // ------------------- USERS -------------------
+    @GetMapping("/users")
+    public ResponseEntity<?> getUserStats() {
+        return ResponseEntity.ok(Map.of(
+                "totalUsers", adminDashService.getTotalUsers(),
+                "activeUsers", adminDashService.getActiveUsers(),
+                "bannedUsers", adminDashService.getBannedUsers(),
+                "pendingUsers", adminDashService.getPendingUsers()
+        ));
+    }
+
+
+
+    // ------------------- SUBSCRIPTIONS -------------------
+    @GetMapping("/subscriptions")
+    public ResponseEntity<?> getSubscriptionStats() {
+        return ResponseEntity.ok(Map.of(
+                "freeUsers", adminDashService.getFreeUsers(),
+                "basicUsers", adminDashService.getBasicUsers(),
+                "standardUsers", adminDashService.getStandardUsers(),
+                "premiumUsers", adminDashService.getPremiumUsers(),
+                "vipUsers", adminDashService.getVIPUsers()
+        ));
+    }
+
+    @GetMapping("/subscriptions-growth")
+    public ResponseEntity<?> getSubscriptionGrowth() {
+        return ResponseEntity.ok(Map.of(
+                "subscriptions", Map.of(
+                        "weekly", adminDashService.getSubscriptionWeeklyGrowth(),
+                        "monthly", adminDashService.getSubscriptionMonthlyGrowth(),
+                        "yearly", adminDashService.getSubscriptionYearlyGrowth()
+                )
+        ));
+    }
+
+    @GetMapping("/listings")
+    public ResponseEntity<?> getListingStats() {
+        return ResponseEntity.ok(Map.of(
+                "activeListings", adminDashService.getActiveListing(),
+                "pendingListings", adminDashService.getPendingListing(),
+                "bannedListings", adminDashService.getBannedListing()
+        ));
+    }
+
+    @GetMapping("/listings-growth")
+    public ResponseEntity<?> getListingGrowth() {
+        return ResponseEntity.ok(Map.of(
+                "listings", Map.of(
+                        "weekly", adminDashService.getListingWeeklyGrowth(),
+                        "monthly", adminDashService.getListingMonthlyGrowth(),
+                        "yearly", adminDashService.getListingYearlyGrowth()
+                )
+        ));
+    }
+
+    @GetMapping("/reports")
+    public ResponseEntity<?> getReportStats() {
+        return ResponseEntity.ok(Map.of(
+                "pendingReports", adminDashService.getPendingReports(),
+                "resolvedReports", adminDashService.getResolvedReports(),
+                "rejectedReports", adminDashService.getRejectedReports()
+        ));
+    }
+
+    // ------------------- REVENUE -------------------
+    @GetMapping("/revenue")
+    public ResponseEntity<?> getRevenueStats() {
+        return ResponseEntity.ok(Map.of(
+                "totalRevenue", adminDashService.getTotalRevenue(),
+                "monthlyRevenue", adminDashService.getMonthlyRevenue()
+        ));
+    }
+
+    @GetMapping("/revenue-growth")
+    public ResponseEntity<?> getRevenueGrowth() {
+        return ResponseEntity.ok(Map.of(
+                "revenue", Map.of(
+                        "weekly", adminDashService.getRevenueWeeklyGrowth(),
+                        "monthly", adminDashService.getRevenueMonthlyGrowth(),
+                        "yearly", adminDashService.getRevenueYearlyGrowth()
+                )
+        ));
+    }
+
+    // ------------------- USER REGISTRATION -------------------
+    @GetMapping("/registrations")
+    public ResponseEntity<?> getUserRegistrations() {
+        return ResponseEntity.ok(adminDashService.getMonthlyUserRegistrations());
     }
 }

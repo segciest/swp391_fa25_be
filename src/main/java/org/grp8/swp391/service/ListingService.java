@@ -284,7 +284,7 @@ public class ListingService {
     }
 
     public Page<Listing> findAllPending(Pageable pageable) {
-        return listingRepo.findByStatus(ListingStatus.PENDING, pageable);
+        return listingRepo.findPendingListingsOrderByCreatedAtDesc(pageable);
     }
 
     public Page<Listing> findByTitle(String title, Pageable pageable) {
@@ -383,6 +383,16 @@ public class ListingService {
             }
         }
 
+    }
+
+    public List<Listing> findBySellerAndStatus(String seller, ListingStatus status) {
+        List<Listing> lis = listingRepo.findBySeller_UserIDAndStatus(seller, status);
+        if (lis == null || lis.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy bài đăng nào.");
+        }
+
+
+        return lis;
     }
 
 }

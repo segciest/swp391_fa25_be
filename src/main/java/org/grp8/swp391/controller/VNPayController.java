@@ -2,11 +2,7 @@ package org.grp8.swp391.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.grp8.swp391.dto.request.VNPayPaymentRequest;
-import org.grp8.swp391.entity.Payment;
-import org.grp8.swp391.entity.PaymentStatus;
-import org.grp8.swp391.entity.Subscription;
-import org.grp8.swp391.entity.User;
-import org.grp8.swp391.entity.User_Subscription;
+import org.grp8.swp391.entity.*;
 import org.grp8.swp391.repository.PaymentRepo;
 import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
@@ -57,6 +53,10 @@ public class VNPayController {
             User user = userRepo.findByUserID(paymentRequest.getUserId());
             if (user == null) {
                 throw new RuntimeException("User not found");
+            }
+
+            if (user.getUserStatus() != UserStatus.ACTIVE) {
+                throw new RuntimeException("Please verify your email before purchasing a package.");
             }
             
             Subscription subscription = subRepo.findById(paymentRequest.getSubscriptionId())

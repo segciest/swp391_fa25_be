@@ -36,4 +36,45 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.status = :status")
     Double sumAmountByStatus(@Param("status") PaymentStatus status);
 
+    @Query(value = """
+    SELECT MONTH(p.create_date) AS month, SUM(p.amount) AS revenue
+    FROM payment p
+    WHERE p.status = 'COMPLETED'
+      AND YEAR(p.create_date) = YEAR(GETDATE())
+    GROUP BY MONTH(p.create_date)
+    ORDER BY MONTH(p.create_date)
+    """, nativeQuery = true)
+    List<Object[]> getMonthlyRevenue();
+
+
+    @Query(value = """
+        SELECT CONCAT(YEAR(p.payment_date), '-W', DATEPART(ISO_WEEK, p.payment_date)) AS week,
+               SUM(p.amount) AS amount
+        FROM payments p
+        WHERE p.status = 'COMPLETED'
+          AND YEAR(p.payment_date) = YEAR(GETDATE())
+        GROUP BY YEAR(p.payment_date), DATEPART(ISO_WEEK, p.payment_date)
+        ORDER BY week
+    """, nativeQuery = true)
+    List<Object[]> getRevenueWeeklyGrowth();
+
+    @Query(value = """
+        SELECT FORMAT(p.payment_date, 'yyyy-MM') AS month, SUM(p.amount) AS amount
+        FROM payments p
+        WHERE p.status = 'COMPLETED'
+          AND YEAR(p.payment_date) = YEAR(GETDATE())
+        GROUP BY FORMAT(p.payment_date, 'yyyy-MM')
+        ORDER BY month
+    """, nativeQuery = true)
+    List<Object[]> getRevenueMonthlyGrowth();
+
+    @Query(value = """
+        SELECT YEAR(p.payment_date) AS year, SUM(p.amount) AS amount
+        FROM payments p
+        WHERE p.status = 'COMPLETED'
+        GROUP BY YEAR(p.payment_date)
+        ORDER BY year
+    """, nativeQuery = true)
+    List<Object[]> getRevenueYearlyGrowth();
+
 }
