@@ -73,20 +73,10 @@ public class VNPayController {
                 long minutesAgo = (new Date().getTime() - latestPending.getCreateDate().getTime()) / 60000;
                 
                 if (minutesAgo < 15) {
-                    // Chưa đủ 15 phút → trả về thông tin payment để user có thể hủy
+                    // Chưa đủ 15 phút → trả về lỗi ngắn gọn
                     return ResponseEntity.badRequest().body(Map.of(
                         "error", "PENDING_PAYMENT_EXISTS",
-                        "message", "Bạn có giao dịch chưa hoàn tất cho gói " + 
-                                   latestPending.getUserSubscription().getSubscriptionId().getSubName() + 
-                                   ". Vui lòng hủy giao dịch cũ trước khi đăng ký gói mới.",
-                        "pendingPayment", Map.of(
-                            "paymentId", latestPending.getPaymentId(),
-                            "orderId", latestPending.getOrderId(),
-                            "amount", latestPending.getAmount(),
-                            "packageName", latestPending.getUserSubscription().getSubscriptionId().getSubName(),
-                            "createDate", latestPending.getCreateDate(),
-                            "minutesRemaining", 15 - minutesAgo
-                        )
+                        "message", "Bạn có giao dịch chưa hoàn thành"
                     ));
                 } else {
                     // Đã > 15 phút → auto-cancel payment cũ (hết hạn VNPay)
