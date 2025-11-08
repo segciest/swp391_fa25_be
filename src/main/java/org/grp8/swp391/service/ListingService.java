@@ -1,13 +1,11 @@
 package org.grp8.swp391.service;
 
 
+import jakarta.transaction.Transactional;
 import org.grp8.swp391.dto.response.ListingDetailResponse;
 import org.grp8.swp391.dto.response.ListingResponse;
 import org.grp8.swp391.entity.*;
-import org.grp8.swp391.repository.ListingRepo;
-import org.grp8.swp391.repository.SubRepo;
-import org.grp8.swp391.repository.UserRepo;
-import org.grp8.swp391.repository.UserSubRepo;
+import org.grp8.swp391.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -28,6 +26,12 @@ public class ListingService {
     private CloudinaryService cloudinaryService;
 
     @Autowired
+    private FavoriteRepo favoriteRepo;
+
+    @Autowired
+    private ReportRepo reportRepo;
+
+    @Autowired
     private UserRepo userRepo;
 
     @Autowired
@@ -44,8 +48,11 @@ public class ListingService {
     public Page<Listing> findAll(Pageable pageable) {
         return listingRepo.findAll(pageable);
     }
-
+    @Transactional
     public void delete(String id) {
+        favoriteRepo.deleteByListing_ListingId(id);
+        reportRepo.deleteByListing_ListingId(id);
+
         listingRepo.deleteById(id);
     }
 
