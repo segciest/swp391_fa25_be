@@ -146,6 +146,9 @@ public class AdminDashService {
     public List<Map<String, Object>> getListingYearlyGrowth() {
         return mapResults(listingRepo.getListingYearlyGrowth(), "year", "count");
     }
+    public List<Map<String, Object>> getListingQuarterlyGrowth() {
+        return mapResults(listingRepo.getListingQuarterlyGrowth(), "quarter", "count");
+    }
 
     // SUBSCRIPTION
     public List<Map<String, Object>> getSubscriptionWeeklyGrowth() {
@@ -157,6 +160,9 @@ public class AdminDashService {
     public List<Map<String, Object>> getSubscriptionYearlyGrowth() {
         return mapResults(userSubRepo.getSubscriptionYearlyGrowth(), "year", "activated");
     }
+    public List<Map<String, Object>> getSubscriptionQuarterlyGrowth() {
+        return mapResults(userSubRepo.getSubscriptionQuarterlyGrowth(), "quarter", "activated");
+    }
 
     // REVENUE
     public List<Map<String, Object>> getRevenueWeeklyGrowth() {
@@ -167,6 +173,23 @@ public class AdminDashService {
     }
     public List<Map<String, Object>> getRevenueYearlyGrowth() {
         return mapResults(paymentRepo.getRevenueYearlyGrowth(), "year", "amount");
+    }
+    public List<Map<String, Object>> getRevenueQuarterlyGrowth() {
+        return mapResults(paymentRepo.getRevenueQuarterlyGrowth(), "quarter", "amount");
+    }
+
+    // REPORTS
+    public List<Map<String, Object>> getReportWeeklyGrowth() {
+        return mapResults(reportRepo.getReportWeeklyGrowth(), "week", "count");
+    }
+    public List<Map<String, Object>> getReportMonthlyGrowth() {
+        return mapResults(reportRepo.getReportMonthlyGrowth(), "month", "count");
+    }
+    public List<Map<String, Object>> getReportQuarterlyGrowth() {
+        return mapResults(reportRepo.getReportQuarterlyGrowth(), "quarter", "count");
+    }
+    public List<Map<String, Object>> getReportYearlyGrowth() {
+        return mapResults(reportRepo.getReportYearlyGrowth(), "year", "count");
     }
 
     private List<Map<String, Object>> mapResults(List<Object[]> rows, String... keys) {

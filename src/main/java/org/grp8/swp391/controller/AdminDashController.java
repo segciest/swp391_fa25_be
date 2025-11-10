@@ -49,6 +49,7 @@ public class AdminDashController {
                 "subscriptions", Map.of(
                         "weekly", adminDashService.getSubscriptionWeeklyGrowth(),
                         "monthly", adminDashService.getSubscriptionMonthlyGrowth(),
+                        "quarterly", adminDashService.getSubscriptionQuarterlyGrowth(),
                         "yearly", adminDashService.getSubscriptionYearlyGrowth()
                 )
         ));
@@ -69,6 +70,7 @@ public class AdminDashController {
                 "listings", Map.of(
                         "weekly", adminDashService.getListingWeeklyGrowth(),
                         "monthly", adminDashService.getListingMonthlyGrowth(),
+                        "quarterly", adminDashService.getListingQuarterlyGrowth(),
                         "yearly", adminDashService.getListingYearlyGrowth()
                 )
         ));
@@ -83,12 +85,25 @@ public class AdminDashController {
         ));
     }
 
+    @GetMapping("/reports-growth")
+    public ResponseEntity<?> getReportGrowth() {
+        return ResponseEntity.ok(Map.of(
+                "reports", Map.of(
+                        "weekly", adminDashService.getReportWeeklyGrowth(),
+                        "monthly", adminDashService.getReportMonthlyGrowth(),
+                        "quarterly", adminDashService.getReportQuarterlyGrowth(),
+                        "yearly", adminDashService.getReportYearlyGrowth()
+                )
+        ));
+    }
+
     // ------------------- REVENUE -------------------
     @GetMapping("/revenue")
     public ResponseEntity<?> getRevenueStats() {
         return ResponseEntity.ok(Map.of(
                 "totalRevenue", adminDashService.getTotalRevenue(),
-                "monthlyRevenue", adminDashService.getMonthlyRevenue()
+                                "monthlyRevenue", adminDashService.getMonthlyRevenue(),
+                                "quarterlyRevenue", adminDashService.getRevenueQuarterlyGrowth()
         ));
     }
 
@@ -98,6 +113,7 @@ public class AdminDashController {
                 "revenue", Map.of(
                         "weekly", adminDashService.getRevenueWeeklyGrowth(),
                         "monthly", adminDashService.getRevenueMonthlyGrowth(),
+                        "quarterly", adminDashService.getRevenueQuarterlyGrowth(),
                         "yearly", adminDashService.getRevenueYearlyGrowth()
                 )
         ));

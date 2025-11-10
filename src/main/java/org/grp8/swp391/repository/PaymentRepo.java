@@ -79,6 +79,14 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
 """, nativeQuery = true)
     List<Object[]> getRevenueYearlyGrowth();
 
-
+    @Query(value = """
+    SELECT DATEPART(QUARTER, p.create_date) AS quarter, SUM(p.amount) AS amount
+    FROM payment p
+    WHERE p.status = 'COMPLETED'
+      AND YEAR(p.create_date) = YEAR(GETDATE())
+    GROUP BY DATEPART(QUARTER, p.create_date)
+    ORDER BY DATEPART(QUARTER, p.create_date)
+""", nativeQuery = true)
+    List<Object[]> getRevenueQuarterlyGrowth();
 
 }

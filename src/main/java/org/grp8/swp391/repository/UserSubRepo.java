@@ -71,4 +71,13 @@ public interface UserSubRepo extends JpaRepository<User_Subscription, Long> {
     """, nativeQuery = true)
     List<Object[]> getSubscriptionYearlyGrowth();
 
+    @Query(value = """
+        SELECT DATEPART(QUARTER, us.start_date) AS quarter, COUNT(DISTINCT us.user_id) AS activated
+        FROM User_Subscription us
+        WHERE YEAR(us.start_date) = YEAR(GETDATE())
+        GROUP BY DATEPART(QUARTER, us.start_date)
+        ORDER BY DATEPART(QUARTER, us.start_date)
+    """, nativeQuery = true)
+    List<Object[]> getSubscriptionQuarterlyGrowth();
+
 }
