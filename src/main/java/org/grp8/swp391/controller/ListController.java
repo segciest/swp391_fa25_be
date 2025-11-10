@@ -171,8 +171,12 @@ public class ListController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteListing(@PathVariable String id) {
+        try{
         listingService.delete(id);
         return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
@@ -280,17 +284,24 @@ public class ListController {
     public ResponseEntity<?> getByStatus(@PathVariable ListingStatus status,
                                          @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.findByStatus(status, pageable));
-
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.findByStatus(status, pageable));
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<?> getByCategory(@PathVariable Long categoryId,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.findByCategoryId(categoryId, pageable));
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.findByCategoryId(categoryId, pageable));
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/search/title")
@@ -309,26 +320,42 @@ public class ListController {
     public ResponseEntity<?> searchByModel(@RequestParam String model,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.findByModel(model, pageable));
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.findByModel(model, pageable));
+        }catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/search/color")
     public ResponseEntity<?> searchByColor(@RequestParam String color,@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.findByColor(color, pageable));
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.findByColor(color, pageable));
+        }catch(RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/search/brand")
     public ResponseEntity<?> searchByBrand(@RequestParam String brand, @RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.findByBrand(brand, pageable));
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.findByBrand(brand, pageable));
+        }catch(RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/search/vehicle-type")
     public ResponseEntity<?> searchByVehicleType(@RequestParam String type, @RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.findByVehicleType(type, pageable));
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.findByVehicleType(type, pageable));
+        }catch(RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/filter/year")
@@ -339,8 +366,12 @@ public class ListController {
 
     @GetMapping("/filter/price")
     public ResponseEntity<?> filterByPrice(@RequestParam Double min,@RequestParam Double max,@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.filterByPriceRange(min, max, pageable));
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(listingService.filterByPriceRange(min, max, pageable));
+        }catch(RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/user-listing")

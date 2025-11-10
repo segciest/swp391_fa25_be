@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -107,8 +108,9 @@ public class ReportController {
         return ResponseEntity.ok(reportService.toReportResponse(updated));
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createReport(@RequestBody Map<String, String> payload, HttpServletRequest request) {
+    @PostMapping(value = "/create", consumes = "multipart/form-data")
+    public ResponseEntity<?> createReport(@RequestBody Map<String, String> payload,  @RequestPart(value = "file", required = false) MultipartFile file
+            , HttpServletRequest request) {
         try {
             String token = jwtUtils.extractToken(request);
             if (token == null || !jwtUtils.checkValidToken(token))
@@ -128,7 +130,7 @@ public class ReportController {
             if (listing == null)
                 return ResponseEntity.status(404).body(Map.of("error", "Listing not found"));
 
-            Report saved = reportService.createReport(reporter, listing, reason);
+            Report saved = reportService.createReport(reporter, listing, reason,file);
             return ResponseEntity.status(201).body(reportService.toReportResponse(saved));
 
         } catch (RuntimeException e) {
@@ -139,5 +141,20 @@ public class ReportController {
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getReportStatus(@PathVariable ReportedStatus status) {
         return ResponseEntity.ok(reportService.toReportResponseList(reportService.getReportsByStatus(status)));
+    }
+
+    @PutMapping("/handle/{id}")
+    public ResponseEntity<?> handleReport(@PathVariable Long id,@RequestParam String actionType) {
+        try{
+            ReportResponse report = reportService.handleReportAction(id, actionType);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Report handled successfully",
+                    "action", actionType,
+                    "report", report
+            ));
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+
+        }
     }
 }

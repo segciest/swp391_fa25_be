@@ -30,4 +30,6 @@ Report {
     @Temporal(TemporalType.DATE)
     private Date createAt;
 
+    private String imgUrl;
+
 }

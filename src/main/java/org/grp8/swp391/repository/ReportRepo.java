@@ -21,6 +21,8 @@ public interface ReportRepo extends JpaRepository<Report,Long> {
 
     void deleteByReportId(Long reportId);
 
+    void deleteByListing_ListingId(String listingId);
+
     Report findByReportId(Long reportId);
 
     Long countByStatus(ReportedStatus status);
