@@ -252,7 +252,7 @@ public class UserController {
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         try {
             userService.sendResetPasswordOtp(email);
-            String resetToken = jwtUtils.generateResetToken(email, 10); // 10 phút
+            String resetToken = jwtUtils.generateResetToken(email, 10);
             return ResponseEntity.ok(Map.of(
                     "message", "OTP đã được gửi đến email của bạn.",
                     "resetToken", resetToken
