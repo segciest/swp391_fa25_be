@@ -29,7 +29,7 @@ Report {
     private ReportedStatus status;
     @Temporal(TemporalType.DATE)
     private Date createAt;
-
+    private String message;
     private String imgUrl;
 
 }

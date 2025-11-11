@@ -87,7 +87,7 @@ Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pagea
 """, nativeQuery = true)
     List<Object[]> getListingYearlyGrowth();
 
-    @Query(value = """
+  @Query(value = """
     SELECT DATEPART(QUARTER, l.Create_At) AS quarter, COUNT(*) AS count
     FROM listing l
     WHERE YEAR(l.Create_At) = YEAR(GETDATE())
@@ -96,9 +96,9 @@ Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pagea
 """, nativeQuery = true)
     List<Object[]> getListingQuarterlyGrowth();
 
+  Long countByCategory_categoryId(Long categoryId);
 
-
-
-
+    @Query("SELECT l.category.categoryName, COUNT(l) FROM Listing l GROUP BY l.category.categoryName")
+    List<Object[]> countListingsByCategory();
 
 }
