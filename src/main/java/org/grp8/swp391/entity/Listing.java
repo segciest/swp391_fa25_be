@@ -81,6 +81,7 @@ public class Listing {
     private String contact;
     @Column(name = "City", columnDefinition = "NVARCHAR(100)")
     private String city;
+    private String message;
 
     @Enumerated(EnumType.STRING)
     private ListingStatus status;
