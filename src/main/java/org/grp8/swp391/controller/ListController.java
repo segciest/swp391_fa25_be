@@ -305,11 +305,16 @@ public class ListController {
     }
 
     @GetMapping("/search/title")
-    public ResponseEntity<?> getByTitle(@RequestParam String title, @RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<?> getByTitle( @RequestParam(required = false, defaultValue = "") String title, @RequestParam(defaultValue = "0") int page,
                                         @RequestParam(defaultValue = "20") int size) {
         try{
             Pageable pageable = PageRequest.of(page, size);
-            return ResponseEntity.ok(listingService.findByTitle(title, pageable));
+            Page<Listing> listings = listingService.findByTitle(title, pageable);
+            List<ListingDetailResponse> response = listings.getContent()
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
         }catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -322,7 +327,12 @@ public class ListController {
                                            @RequestParam(defaultValue = "20") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            return ResponseEntity.ok(listingService.findByModel(model, pageable));
+            Page<Listing> listings = listingService.findByModel(model, pageable);
+            List<ListingDetailResponse> response = listings.getContent()
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
         }catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -332,7 +342,12 @@ public class ListController {
     public ResponseEntity<?> searchByColor(@RequestParam String color,@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            return ResponseEntity.ok(listingService.findByColor(color, pageable));
+            Page<Listing> listings = listingService.findByColor(color, pageable);
+            List<ListingDetailResponse> response = listings.getContent()
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
         }catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -342,7 +357,12 @@ public class ListController {
     public ResponseEntity<?> searchByBrand(@RequestParam String brand, @RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            return ResponseEntity.ok(listingService.findByBrand(brand, pageable));
+            Page<Listing> listings = listingService.findByBrand(brand, pageable);
+            List<ListingDetailResponse> response = listings.getContent()
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
         }catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

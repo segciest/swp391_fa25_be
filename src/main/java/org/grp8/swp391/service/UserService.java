@@ -82,6 +82,16 @@ public class UserService {
         return userRepo.save(u);
     }
 
+    public List<User> findAllNormalUser(){
+        List<User> u = userRepo.findAllByRole_RoleName("USER");
+        if(u == null){
+            throw new RuntimeException("User not found");
+        }
+
+        return u;
+
+    }
+
 
     public User login(String email, String password) {
         User user = userRepo.findByUserEmail(email);

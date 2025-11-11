@@ -1,5 +1,6 @@
 package org.grp8.swp391.repository;
 
+import org.grp8.swp391.entity.RoleType;
 import org.grp8.swp391.entity.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.grp8.swp391.entity.User;
@@ -38,6 +39,8 @@ public interface UserRepo extends JpaRepository<User, String> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.subid.subName = 'VIP'")
     Long countUsersWithVIPSubscription();
+
+    List<User> findAllByRole_RoleName(String userRole);
 
 
 
