@@ -30,6 +30,9 @@ public class AdminDashService {
     @Autowired
     private UserSubRepo userSubRepo;
 
+    @Autowired
+    private CategoryRepo categoryRepo;
+
 
     /** Tổng số người dùng */
     public Long getTotalUsers() {
@@ -208,6 +211,23 @@ public class AdminDashService {
 
         return response;
     }
+
+    public List<Map<String, Object>> getListingCountByCategory() {
+        List<Object[]> results = listingRepo.countListingsByCategory();
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        for (Object[] row : results) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("category", row[0]);  // Tên category
+            data.put("count", row[1]);     // Số lượng bài đăng
+            response.add(data);
+        }
+
+        return response;
+    }
+
+
+
 
 
 

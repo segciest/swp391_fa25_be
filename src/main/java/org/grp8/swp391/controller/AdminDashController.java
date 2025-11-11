@@ -117,4 +117,12 @@ public class AdminDashController {
                 "quarterlyRevenue", adminDashService.getQuarterlyRevenue()
         ));
     }
+
+
+    @GetMapping("/listing/category-count")
+    public ResponseEntity<?> getListingCountByCategory() {
+        return ResponseEntity.ok(Map.of(
+                "listingCountByCategory", adminDashService.getListingCountByCategory()
+        ));
+    }
 }
