@@ -205,5 +205,33 @@ public class AdminDashService {
     }
 
 
+    public List<Map<String, Object>> getQuarterlyRevenue() {
+        List<Object[]> results = paymentRepo.getQuarterlyRevenue();
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        // Khởi tạo 4 quý mặc định (Q1–Q4)
+        String[] quarters = {"Q1", "Q2", "Q3", "Q4"};
+        for (String q : quarters) {
+            Map<String, Object> quarterData = new HashMap<>();
+            quarterData.put("quarter", q);
+            quarterData.put("revenue", 0.0);
+            response.add(quarterData);
+        }
+
+        // Cập nhật doanh thu thực tế từ DB
+        for (Object[] row : results) {
+            String quarter = (String) row[0];
+            double revenue = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+
+            response.stream()
+                    .filter(item -> item.get("quarter").equals(quarter))
+                    .findFirst()
+                    .ifPresent(item -> item.put("revenue", revenue));
+        }
+
+        return response;
+    }
+
+
 
 }

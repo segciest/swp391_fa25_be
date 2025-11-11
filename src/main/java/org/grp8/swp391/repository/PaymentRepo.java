@@ -89,4 +89,29 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
 """, nativeQuery = true)
     List<Object[]> getRevenueQuarterlyGrowth();
 
+    @Query(value = """
+    SELECT 
+        CASE 
+            WHEN MONTH(p.create_date) BETWEEN 1 AND 3 THEN 'Q1'
+            WHEN MONTH(p.create_date) BETWEEN 4 AND 6 THEN 'Q2'
+            WHEN MONTH(p.create_date) BETWEEN 7 AND 9 THEN 'Q3'
+            WHEN MONTH(p.create_date) BETWEEN 10 AND 12 THEN 'Q4'
+        END AS quarter,
+        SUM(p.amount) AS revenue
+    FROM payment p
+    WHERE p.status = 'COMPLETED'
+      AND YEAR(p.create_date) = YEAR(GETDATE())
+    GROUP BY 
+        CASE 
+            WHEN MONTH(p.create_date) BETWEEN 1 AND 3 THEN 'Q1'
+            WHEN MONTH(p.create_date) BETWEEN 4 AND 6 THEN 'Q2'
+            WHEN MONTH(p.create_date) BETWEEN 7 AND 9 THEN 'Q3'
+            WHEN MONTH(p.create_date) BETWEEN 10 AND 12 THEN 'Q4'
+        END
+    ORDER BY quarter
+""", nativeQuery = true)
+    List<Object[]> getQuarterlyRevenue();
+
+
+
 }
