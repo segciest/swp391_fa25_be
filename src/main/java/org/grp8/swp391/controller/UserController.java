@@ -133,6 +133,16 @@ public class UserController {
         }
     }
 
+    @GetMapping("/normal-user")
+    public ResponseEntity<?> getNormalUser(){
+        try{
+            List<User> users = userService.findAllNormalUser();
+            return ResponseEntity.ok(users);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
