@@ -56,10 +56,7 @@ public class ReportController {
         return ResponseEntity.ok(Map.of("message", "Report deleted successfully", "reportId", id));
     }
 
-    @GetMapping("/pending")
-    public ResponseEntity<?> findByPending() {
-        return ResponseEntity.ok(reportService.toReportResponseList(reportService.findByPendingStatus()));
-    }
+
 
     @GetMapping("/reject")
     public ResponseEntity<?> findByRejected() {
@@ -113,7 +110,7 @@ public class ReportController {
     public ResponseEntity<?> createReport(
             @RequestParam("listingId") String listingId,
             @RequestParam("reason") String reason,
-            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart(value = "images", required = false) MultipartFile[] file,
             HttpServletRequest request) {
 
         try {
@@ -134,6 +131,15 @@ public class ReportController {
             return ResponseEntity.status(201).body(reportService.toReportResponse(saved));
 
         } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    @GetMapping("/pending")
+    public ResponseEntity<?> getPendingReport(){
+        try {
+            List<Report> reports = reportService.findByPendingStatus();
+            return ResponseEntity.ok(reportService.toReportResponseList(reports));
+        }catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

@@ -129,6 +129,10 @@ public class ListingService {
 
 
     private List<Image> uploadImages(MultipartFile[] files, Listing listing) {
+        if (files.length > 5) {
+            throw new RuntimeException("You can only upload up to 5 images.");
+        }
+
         List<Image> images = new ArrayList<>();
         for (MultipartFile file : files) {
             String url = cloudinaryService.uploadFile(file);
