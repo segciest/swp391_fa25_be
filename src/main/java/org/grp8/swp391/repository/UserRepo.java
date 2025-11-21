@@ -22,6 +22,7 @@ public interface UserRepo extends JpaRepository<User, String> {
     User findByPhone(String phone);
     List<User> findByCityIgnoreCase(String city);
 
+
     User findByVerifiedCode(String code);
     Long countByUserStatus(UserStatus userStatus);
 

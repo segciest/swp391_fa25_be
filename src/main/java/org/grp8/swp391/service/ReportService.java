@@ -178,6 +178,7 @@ public class ReportService {
 
                 report.getReason(),
                 report.getStatus() != null ? report.getStatus().name() : null,
+                report.getImgUrl(),
                 report.getCreateAt()
         );
     }

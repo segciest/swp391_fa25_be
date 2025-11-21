@@ -107,10 +107,15 @@ public class ReportController {
         Report updated = reportService.updateReport(reportId, report);
         return ResponseEntity.ok(reportService.toReportResponse(updated));
     }
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('MODERATOR')")
 
     @PostMapping(value = "/create", consumes = "multipart/form-data")
-    public ResponseEntity<?> createReport(@RequestBody Map<String, String> payload,  @RequestPart(value = "file", required = false) MultipartFile file
-            , HttpServletRequest request) {
+    public ResponseEntity<?> createReport(
+            @RequestParam("listingId") String listingId,
+            @RequestParam("reason") String reason,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            HttpServletRequest request) {
+
         try {
             String token = jwtUtils.extractToken(request);
             if (token == null || !jwtUtils.checkValidToken(token))
@@ -121,16 +126,11 @@ public class ReportController {
             if (reporter == null)
                 return ResponseEntity.status(404).body(Map.of("error", "User not found"));
 
-            String listingId = payload.get("listingId");
-            String reason = payload.get("reason");
-            if (listingId == null || reason == null || reason.isBlank())
-                return ResponseEntity.badRequest().body(Map.of("error", "Missing listingId or reason"));
-
             Listing listing = listingService.findById(listingId);
             if (listing == null)
                 return ResponseEntity.status(404).body(Map.of("error", "Listing not found"));
 
-            Report saved = reportService.createReport(reporter, listing, reason,file);
+            Report saved = reportService.createReport(reporter, listing, reason, file);
             return ResponseEntity.status(201).body(reportService.toReportResponse(saved));
 
         } catch (RuntimeException e) {
@@ -138,10 +138,12 @@ public class ReportController {
         }
     }
 
+
     @GetMapping("/status/{status}")
     public ResponseEntity<?> getReportStatus(@PathVariable ReportedStatus status) {
         return ResponseEntity.ok(reportService.toReportResponseList(reportService.getReportsByStatus(status)));
     }
+    @PreAuthorize("hasAuthority('ADMIN')")
 
     @PutMapping("/handle/{id}")
     public ResponseEntity<?> handleReport(@PathVariable Long id,@RequestParam String actionType) {

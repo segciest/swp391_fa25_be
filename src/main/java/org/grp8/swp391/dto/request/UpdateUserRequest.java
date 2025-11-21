@@ -17,6 +17,5 @@ public class UpdateUserRequest {
     private String password;
     private Date dob;
     private String city;
-    private String address;
 
 }

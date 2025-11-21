@@ -25,6 +25,9 @@ public class SecurityConfig {
     private JwtFilter jwtFilter;
 
     @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @Autowired
     private AuthUserService authUserService;
 
     @Bean
@@ -34,6 +37,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
+                )
+                .oauth2Login(oauth ->
+                        oauth.successHandler(oAuth2SuccessHandler)
                 )
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
