@@ -279,11 +279,11 @@ public class ListingService {
     }
 
     public Page<Listing> findByBrand(String brand, Pageable pageable) {
-        return listingRepo.findByBrandIgnoreCase(brand, pageable);
+        return listingRepo.findByBrandContainingIgnoreCaseAndStatus(brand,ListingStatus.ACTIVE, pageable);
     }
 
     public Page<Listing> filterByPriceRange(Double minPrice, Double maxPrice, Pageable pageable) {
-        return listingRepo.findByPriceBetween(minPrice, maxPrice, pageable);
+        return listingRepo.findByPriceBetweenAndStatus(minPrice, maxPrice,ListingStatus.ACTIVE, pageable);
     }
 
     public Page<Listing> findByVehicleType(String vehicleType, Pageable pageable) {
@@ -291,7 +291,7 @@ public class ListingService {
     }
 
     public Page<Listing> findByYearRange(Integer start, Integer end, Pageable pageable) {
-        return listingRepo.findByYearBetween(start, end, pageable);
+        return listingRepo.findByYearBetweenAndStatus(start, end,ListingStatus.ACTIVE, pageable);
     }
 
     public Page<Listing> findAllActive(Pageable pageable) {

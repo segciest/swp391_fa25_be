@@ -27,14 +27,17 @@ public interface ListingRepo extends JpaRepository<Listing, String> {
 
     Page<Listing> findByModelContainingIgnoreCase(String model, Pageable pageable);
     Page<Listing> findByColorIgnoreCase(String color, Pageable pageable);
-    Page<Listing> findByBrandIgnoreCase(String brand, Pageable pageable);
+    Page<Listing> findByBrandIgnoreCase(String brand,ListingStatus status, Pageable pageable);
     Page<Listing> findByVehicleTypeIgnoreCase(String type, Pageable pageable);
 
-    Page<Listing> findByYearBetween(int startYear, int endYear, Pageable pageable);
-    Page<Listing> findByPriceBetween(Double min, Double max, Pageable pageable);
+    Page<Listing> findByYearBetween(int startYear, int endYear,ListingStatus status, Pageable pageable);
+    Page<Listing> findByPriceBetween(Double min, Double max,ListingStatus status, Pageable pageable);
     Long countByStatus(ListingStatus status);
     Page<Listing> findByCityIgnoreCase(String city, Pageable pageable);
 Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pageable);
+
+    Page<Listing> findByPriceBetweenAndStatus(Double minPrice, Double maxPrice, ListingStatus status, Pageable pageable);
+
 
 
     @Query("""
@@ -100,5 +103,8 @@ Page<Listing> findByTitleContaining(@Param("title") String title, Pageable pagea
 
     @Query("SELECT l.category.categoryName, COUNT(l) FROM Listing l GROUP BY l.category.categoryName")
     List<Object[]> countListingsByCategory();
+
+    Page<Listing> findByYearBetweenAndStatus(Integer start, Integer end, ListingStatus status, Pageable pageable);
+    Page<Listing> findByBrandContainingIgnoreCaseAndStatus(String brand, ListingStatus status, Pageable pageable);
 
 }
