@@ -18,6 +18,8 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     List<Payment> findByMethod(String method);
 
     Payment findByPaymentId(Long paymentId);
+    void deleteByUserSubscription_UserSubId(Long userSubId);
+
 
     List<Payment> findByUserSubscription(User_Subscription userSubscription);
 

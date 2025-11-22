@@ -68,6 +68,10 @@ public class ListingService {
         return listingRepo.findBySeller_UserID(sellerId, pageable);
     }
 
+    public List<Listing> findBySellerId(String sellerId) {
+        return listingRepo.findBySeller_UserID(sellerId);
+    }
+
     public Listing save(Listing listing) {
         return listingRepo.save(listing);
     }

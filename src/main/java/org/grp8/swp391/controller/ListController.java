@@ -401,15 +401,29 @@ public class ListController {
 
     @GetMapping("/filter/year")
     public ResponseEntity<?> filterByYear(@RequestParam int start,@RequestParam int end,@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(listingService.findByYearRange(start, end, pageable));
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Listing> listings = listingService.findByYearRange(start, end, pageable);
+            List<ListingDetailResponse> response = listings.getContent()
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        }catch(RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/filter/price")
     public ResponseEntity<?> filterByPrice(@RequestParam Double min,@RequestParam Double max,@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
         try {
             Pageable pageable = PageRequest.of(page, size);
-            return ResponseEntity.ok(listingService.filterByPriceRange(min, max, pageable));
+            Page<Listing> listings = listingService.filterByPriceRange(min, max, pageable);
+            List<ListingDetailResponse> response = listings.getContent()
+                    .stream()
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
         }catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
