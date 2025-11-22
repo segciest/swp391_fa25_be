@@ -155,13 +155,33 @@ public class ListController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/reject/{id}")
-    public ResponseEntity<?> rejectListing(@PathVariable String id) {
+    public ResponseEntity<?> rejectListing(@PathVariable String id, @RequestParam(required = false) String reason) {
         try {
             Listing rejectedListing = listingService.updateListingStatus(id, ListingStatus.REJECTED);
-            
-            // ✅ Gửi thông báo cho user khi bài đăng bị từ chối
-            notificationService.notifyListingRejected(rejectedListing.getSeller(), rejectedListing);
-            
+
+            // If admin provided a reason, store it on the listing.message (no schema change)
+            if (reason != null && !reason.isBlank()) {
+                try {
+                    rejectedListing.setMessage(reason);
+                    listingService.save(rejectedListing);
+                } catch (Exception ex) {
+                    // ignore save failure of message but proceed to notify
+                    System.err.println("Failed to save reject reason to listing: " + ex.getMessage());
+                }
+            }
+
+            // Notify seller; include reason if provided
+            try {
+                if (reason != null && !reason.isBlank()) {
+                    String msg = "Bài đăng của bạn đã bị từ chối. Lý do: " + reason;
+                    notificationService.createNotification(rejectedListing.getSeller().getUserID(), msg);
+                } else {
+                    notificationService.notifyListingRejected(rejectedListing.getSeller(), rejectedListing);
+                }
+            } catch (Exception ex) {
+                System.err.println("Failed to create rejection notification: " + ex.getMessage());
+            }
+
             return ResponseEntity.ok("Listing rejected successfully with id: " + id);
         }catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -48,6 +48,8 @@ public class UserService {
     private CloudinaryService cloudinaryService;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private org.grp8.swp391.repository.ListingRepo listingRepo;
 
     public User updateUserRole(String id, Long roleId){
         User u = userRepo.findByUserID(id);
@@ -74,12 +76,30 @@ public class UserService {
     }
 
 
+    @Transactional
     public User updateUSerStatus(String id, UserStatus userStatus){
         User u = userRepo.findByUserID(id);
         if(u == null){
             throw new RuntimeException("User not found with id: " + id);
         }
+
         u.setUserStatus(userStatus);
+
+        // If banning a user, also ban all their listings atomically
+        if (userStatus == UserStatus.BANNED) {
+            try {
+                java.util.List<org.grp8.swp391.entity.Listing> listings = listingRepo.findBySeller_UserID(u.getUserID());
+                if (listings != null && !listings.isEmpty()) {
+                    for (org.grp8.swp391.entity.Listing l : listings) {
+                        l.setStatus(org.grp8.swp391.entity.ListingStatus.BANNED);
+                    }
+                    listingRepo.saveAll(listings);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to ban user's listings: " + e.getMessage());
+            }
+        }
+
         return userRepo.save(u);
     }
 

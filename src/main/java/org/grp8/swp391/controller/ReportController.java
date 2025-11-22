@@ -163,6 +163,6 @@ public class ReportController {
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
 
-        }
+        }   
     }
 }
