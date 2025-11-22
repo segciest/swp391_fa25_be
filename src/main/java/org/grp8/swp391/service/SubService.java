@@ -9,6 +9,7 @@ import org.grp8.swp391.repository.SubRepo;
 import org.grp8.swp391.repository.UserRepo;
 import org.grp8.swp391.repository.UserSubRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -167,6 +168,7 @@ public class SubService {
         user.setSubid(null);
         return userRepo.save(user);
     }
+    @Scheduled(cron = "0 0/30 * * * *")
 
     public void checkExpiredSubscription(){
         Date now = new Date();

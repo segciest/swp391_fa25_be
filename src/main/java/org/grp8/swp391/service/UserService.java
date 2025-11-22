@@ -397,5 +397,13 @@ public class UserService {
         emailVerifyService.sendEmailToUser(email, subject, body);
     }
 
+    public List<User> findByUserName(String userName){
+        List<User> u = userRepo.findByUserNameContainingIgnoreCase(userName);
+        if (u == null) {
+            throw new RuntimeException("User not found with name: " + userName);
+        }
+        return u;
+    }
+
 }
 

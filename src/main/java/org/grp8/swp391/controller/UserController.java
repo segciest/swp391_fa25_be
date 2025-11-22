@@ -70,8 +70,15 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
+    @GetMapping("/name")
+    public ResponseEntity<?> findByUserName(@RequestParam String userName){
+        try{
+            List<User> u = userService.findByUserName(userName);
+            return ResponseEntity.ok(u);
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 
     @PutMapping("/profile")
