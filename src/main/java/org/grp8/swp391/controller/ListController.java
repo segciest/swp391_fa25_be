@@ -341,6 +341,23 @@ public class ListController {
         }
     }
 
+    @GetMapping("/search/title/active")
+    public ResponseEntity<?> getByTitleActive(@RequestParam(required = false, defaultValue = "") String title,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "20") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Listing> listings = listingService.findByTitle(title, pageable);
+            List<ListingDetailResponse> response = listings.getContent()
+                    .stream()
+                    .filter(l -> l.getStatus() == ListingStatus.ACTIVE)
+                    .map(listingService::toListingDetailResponse)
+                    .toList();
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @GetMapping("/search/model")
     public ResponseEntity<?> searchByModel(@RequestParam String model,
