@@ -208,6 +208,25 @@ public class UserController {
         }
     }
 
+
+    @PostMapping("/send-verification-email")
+    public ResponseEntity<?> resendVerificationEmail(HttpServletRequest request) {
+        try {
+            String token = jwtUtils.extractToken(request);
+            if (token == null || !jwtUtils.checkValidToken(token)) {
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid or missing token"));
+            }
+
+            String email = jwtUtils.getUsernameFromToken(token);
+            userService.sendVerificationOtp(email);
+
+            return ResponseEntity.ok(Map.of("message", "Mã xác thực đã được gửi đến email của bạn."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('MODERATOR')")
 
     @PutMapping("/active/{id}")

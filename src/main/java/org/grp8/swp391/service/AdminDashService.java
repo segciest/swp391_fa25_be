@@ -241,8 +241,8 @@ public class AdminDashService {
 
         for (Object[] row : results) {
             Map<String, Object> data = new HashMap<>();
-            data.put("category", row[0]);  // Tên category
-            data.put("count", row[1]);     // Số lượng bài đăng
+            data.put("category", row[0]);
+            data.put("count", row[1]);
             response.add(data);
         }
 

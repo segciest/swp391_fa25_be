@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +25,15 @@ public class ReportService {
     @Autowired
     private UserService userService;
 
-    public Report createReport(User reporter, Listing listing, String reason, MultipartFile file) {
+    public List<Report> findAllPendingReport(){
+        List<Report> reports = reportRepo.findByStatus(ReportedStatus.PENDING);
+        if(reports.isEmpty()){
+            throw new EntityNotFoundException("Report not found");
+        }
+        return reports;
+    }
+
+    public Report createReport(User reporter, Listing listing, String reason, MultipartFile[] files) {
         if (reportRepo.existsByReporterAndListing(reporter, listing)) {
             throw new RuntimeException("You have already reported this listing.");
         }
@@ -35,8 +44,23 @@ public class ReportService {
         report.setReason(reason);
         report.setStatus(ReportedStatus.PENDING);
         report.setCreateAt(new Date());
-        String url = cloudinaryService.uploadFile(file);
-        report.setImgUrl(url);
+
+        // Giới hạn 5 ảnh
+        if (files != null && files.length > 5) {
+            throw new RuntimeException("You can upload up to 5 images only.");
+        }
+
+        // Upload ảnh
+        List<String> urls = new ArrayList<>();
+
+        if (files != null) {
+            for (MultipartFile file : files) {
+                String url = cloudinaryService.uploadFile(file);
+                urls.add(url);
+            }
+        }
+
+        report.setImgUrl(String.join(",", urls));
 
         return reportRepo.save(report);
     }
@@ -115,12 +139,10 @@ public class ReportService {
         if (report == null) {
             throw new EntityNotFoundException("Report not found with id " + reportId);
         }
-
         Listing listing = report.getListing();
         if (listing == null) {
             throw new EntityNotFoundException("Listing not found for report " + reportId);
         }
-
         User seller = listing.getSeller();
         if (seller == null) {
             throw new EntityNotFoundException("Seller not found for listing " + listing.getListingId());
@@ -129,9 +151,7 @@ public class ReportService {
         if (actionType == null || actionType.isBlank()) {
             throw new RuntimeException("Action type is required");
         }
-
         String action = actionType.trim();
-
         if (action.equals("bannedlisting")) {
             listing.setStatus(ListingStatus.BANNED);
             listingService.save(listing);
@@ -141,8 +161,6 @@ public class ReportService {
             seller.setUserStatus(UserStatus.BANNED);
             userService.save(seller);
             report.setStatus(ReportedStatus.RESOLVED);
-
-
         } else {
             throw new RuntimeException("Invalid action type. Use 'BannedListing', 'BannedUser', or 'ResolveOnly'.");
         }
@@ -178,6 +196,7 @@ public class ReportService {
 
                 report.getReason(),
                 report.getStatus() != null ? report.getStatus().name() : null,
+                report.getImgUrl(),
                 report.getCreateAt()
         );
     }

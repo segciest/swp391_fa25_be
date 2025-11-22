@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class UserService {
@@ -174,9 +175,6 @@ public class UserService {
             check.setCity(up.getCity().trim());
         }
 
-        if(up.getAddress() != null){
-            check.setAddress(up.getAddress().trim());
-        }
 
         return userRepo.save(check);
     }
@@ -272,6 +270,29 @@ public class UserService {
         u.setAvatarUrl(url);
         return userRepo.save(u);
     }
+
+
+    public void sendVerificationOtp(String email) {
+        User user = userRepo.findByUserEmail(email);
+        if (user == null)
+            throw new RuntimeException("User not found");
+
+        if (user.getUserStatus() == UserStatus.ACTIVE)
+            throw new RuntimeException("Tài khoản đã được xác thực.");
+
+        String otp = String.format("%06d", new Random().nextInt(999999));
+        user.setVerifiedCode(otp);
+        userRepo.save(user);
+
+        String title = "Mã xác thực tài khoản của bạn";
+        String body = "Xin chào " + user.getUserName() + ",\n\n"
+                + "Mã OTP của bạn là: " + otp + "\n\n"
+                + "Vui lòng nhập mã này để xác minh email của bạn.\n\n"
+                + "Trân trọng,\nĐội ngũ SWP391";
+
+        emailVerifyService.sendEmailToUser(user.getUserEmail(), title, body);
+    }
+
 
 
     public boolean verifyOtpCode(String email, String otp) {
