@@ -15,12 +15,13 @@ import java.util.Optional;
 @Repository
 public interface UserRepo extends JpaRepository<User, String> {
     User findByUserID(String userID);
-    User findByUserName(String userName);
+
     User findByUserEmail(String userEmail);
     User findByUserEmailAndUserPassword(String userEmail, String userPassword);
     void deleteByUserID(String userID);
     User findByPhone(String phone);
     List<User> findByCityIgnoreCase(String city);
+    List<User> findByUserNameContainingIgnoreCase(String userName);
 
 
     User findByVerifiedCode(String code);
