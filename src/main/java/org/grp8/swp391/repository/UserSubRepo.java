@@ -20,6 +20,8 @@ public interface UserSubRepo extends JpaRepository<User_Subscription, Long> {
     List<User_Subscription> findByUser(User user);
     void deleteByUser_UserID(String userId);
     User_Subscription findFirstByUserOrderByEndDateDesc(User user);
+    List<User_Subscription> findByUser_UserID(String userId);
+
 
     // Tìm các subscription sắp hết hạn trong khoảng thời gian
     List<User_Subscription> findByEndDateBetween(Date startDate, Date endDate);

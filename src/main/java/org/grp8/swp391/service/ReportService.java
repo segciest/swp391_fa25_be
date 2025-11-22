@@ -160,6 +160,15 @@ public class ReportService {
         } else if (action.equals("banneduser")) {
             seller.setUserStatus(UserStatus.BANNED);
             userService.save(seller);
+
+            // Ban toàn bộ listing của user
+            List<Listing> listings = listingService.findBySellerId(seller.getUserID());
+            if (listings != null && !listings.isEmpty()) {
+                for (Listing l : listings) {
+                    l.setStatus(ListingStatus.BANNED);
+                    listingService.save(l);
+                }
+            }
             report.setStatus(ReportedStatus.RESOLVED);
         } else {
             throw new RuntimeException("Invalid action type. Use 'BannedListing', 'BannedUser', or 'ResolveOnly'.");

@@ -6,10 +6,7 @@ import org.grp8.swp391.config.JwtUtils;
 import org.grp8.swp391.dto.request.RegisterRequest;
 import org.grp8.swp391.dto.request.UpdateUserRequest;
 import org.grp8.swp391.entity.*;
-import org.grp8.swp391.repository.RoleRepo;
-import org.grp8.swp391.repository.SubRepo;
-import org.grp8.swp391.repository.UserRepo;
-import org.grp8.swp391.repository.UserSubRepo;
+import org.grp8.swp391.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,6 +34,12 @@ public class UserService {
 
     @Autowired
     private SubRepo subRepo;
+
+    @Autowired
+    private PaymentRepo  paymentRepo;
+
+    @Autowired
+    private NotificationRepo notificationRepo;
 
 
 
@@ -142,13 +145,22 @@ public class UserService {
     }
     @Transactional
     public void deleteById(String id){
-        User check = userRepo.findByUserID(id);
-        if (check == null) {
+        User user = userRepo.findByUserID(id);
+        if (user == null) {
             throw new RuntimeException("User not found with id: " + id);
         }
+        notificationRepo.deleteByUser_UserID(user.getUserID());
+        List<User_Subscription> subs = userSubRepo.findByUser_UserID(id);
+
+        for (User_Subscription us : subs) {
+            paymentRepo.deleteByUserSubscription_UserSubId(us.getUserSubId());
+        }
+
         userSubRepo.deleteByUser_UserID(id);
-        userRepo.delete(check);
+
+        userRepo.delete(user);
     }
+
 
 
     public User save(User user){
@@ -207,6 +219,23 @@ public class UserService {
 
         if (userRepo.findByPhone(req.getPhone()) != null) {
             throw new RuntimeException("Phone already in use");
+        }
+
+
+        if (req.getDob() != null) {
+            Calendar today = Calendar.getInstance();
+            Calendar dob = Calendar.getInstance();
+            dob.setTime(req.getDob());
+
+            int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+
+            if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+                age--;
+            }
+
+            if (age < 18) {
+                throw new RuntimeException("Người dùng phải từ 18 tuổi trở lên để đăng ký.");
+            }
         }
 
 

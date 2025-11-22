@@ -11,6 +11,10 @@ import java.util.List;
 @Repository
 public interface NotificationRepo extends JpaRepository<Notification, Long> {
 
+    void deleteByUser_UserID(String userId);
+
+    List<Notification> findByUser_UserID(String userId);
+
 
     List<Notification> findByUserAndStatusOrderByCreatedTimeDesc(User user, NotificationStatus status);
 
